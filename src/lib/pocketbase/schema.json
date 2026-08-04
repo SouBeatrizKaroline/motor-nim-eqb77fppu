@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-04T21:44:22.091Z",
+  "generatedAt": "2026-08-04T21:51:55.966Z",
   "collections": [
     {
       "name": "users",
@@ -29,25 +29,808 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         }
       ],
       "indexes": [
         "CREATE UNIQUE INDEX `idx_tokenKey__pb_users_auth_` ON `users` (`tokenKey`)",
         "CREATE UNIQUE INDEX `idx_email__pb_users_auth_` ON `users` (`email`) WHERE `email` != ''"
       ]
+    },
+    {
+      "name": "vtracker_snapshots",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "window_start",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "window_end",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "mention_volume",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "negative_volume",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "positive_volume",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "neutral_volume",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "polarity_index",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "emerging_terms",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "top_posts",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "source_raw",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_vt_start ON vtracker_snapshots (window_start)",
+        "CREATE INDEX idx_vt_created ON vtracker_snapshots (created DESC)"
+      ]
+    },
+    {
+      "name": "crisis_alerts",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "summary",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "severity",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["baixa", "média", "alta", "crítica"]
+        },
+        {
+          "name": "status",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": [
+            "detectado",
+            "processando",
+            "nota_pronta",
+            "roteiro_pronto",
+            "notificado",
+            "resolvido",
+            "descartado"
+          ]
+        },
+        {
+          "name": "trigger_metrics",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "related_snapshot",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "vtracker_snapshots"
+        },
+        {
+          "name": "causa_raiz",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "nota_oficial",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "roteiro_video",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "payload_whatsapp",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "sent_status",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["pendente", "enviado", "falhou", "manual"]
+        },
+        {
+          "name": "sent_at",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_crisis_status ON crisis_alerts (status)",
+        "CREATE INDEX idx_crisis_created ON crisis_alerts (created DESC)"
+      ]
+    },
+    {
+      "name": "speeches",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "title",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "tema",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "tom_de_voz",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "duracao_minutos",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "pautas",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "content",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "structured_meta",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": ["CREATE INDEX idx_speeches_created ON speeches (created DESC)"]
+    },
+    {
+      "name": "retention_scripts",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "platform",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["reels", "tiktok", "shorts"]
+        },
+        {
+          "name": "tipo_conteudo",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "tema",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "hook",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "roteiro_detalhado",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "texto_legenda",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "hashtags",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "tom_de_voz",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_scripts_platform ON retention_scripts (platform)",
+        "CREATE INDEX idx_scripts_created ON retention_scripts (created DESC)"
+      ]
+    },
+    {
+      "name": "demands",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "title",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "category",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "source_terms",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "negative_volume",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "mentions_count",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "region",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "first_seen",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "last_seen",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "embedding",
+          "type": "vector",
+          "required": false,
+          "system": false,
+          "vectorDimensions": 1536,
+          "vectorDistance": "cosine"
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": ["CREATE INDEX idx_demands_cat ON demands (category)"]
+    },
+    {
+      "name": "budget_items",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "code",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "rubric_name",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "category",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "year",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "available_amount",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "keywords",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "embedding",
+          "type": "vector",
+          "required": false,
+          "system": false,
+          "vectorDimensions": 1536,
+          "vectorDistance": "cosine"
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX idx_budget_code ON budget_items (code)",
+        "CREATE INDEX idx_budget_cat ON budget_items (category)"
+      ]
+    },
+    {
+      "name": "amendment_reports",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "title",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "summary",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "recommendations",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "methodology",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": ["CREATE INDEX idx_amendments_created ON amendment_reports (created DESC)"]
+    },
+    {
+      "name": "pipeline_runs",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "pipeline",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["crise", "discurso", "roteiro", "emenda"]
+        },
+        {
+          "name": "trigger",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["cron", "manual", "api"]
+        },
+        {
+          "name": "status",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["executando", "sucesso", "falha"]
+        },
+        {
+          "name": "stage",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "input",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "output",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "error",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "started_at",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "finished_at",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_pipe_status ON pipeline_runs (status)",
+        "CREATE INDEX idx_pipe_created ON pipeline_runs (created DESC)"
+      ]
+    },
+    {
+      "name": "notifications",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "channel",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["whatsapp", "webhook", "manual"]
+        },
+        {
+          "name": "target",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "payload",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "status",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["pendente", "enviado", "falhou", "manual"]
+        },
+        {
+          "name": "provider",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "error",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "related_type",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "related_id",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "sent_at",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_notif_status ON notifications (status)",
+        "CREATE INDEX idx_notif_created ON notifications (created DESC)"
+      ]
+    },
+    {
+      "name": "settings",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "key",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "value",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": ["CREATE UNIQUE INDEX idx_settings_key ON settings (key)"]
     }
   ]
 }
