@@ -3,100 +3,59 @@ routerAdd(
   '/backend/v1/anomaly/detect',
   (e) => {
     try {
-      const snaps = $app.findRecordsByFilter('vtracker_snapshots', '', '-created', 30, 0)
-      if (snaps.length < 3)
-        return e.json(200, { success: false, reason: 'Dados insuficientes para detecção' })
+      const body = e.requestInfo().body || {}
+      const mandateId = body.mandate_id || body.mandateId
 
-      const negVols = snaps.map(function (s) {
-        return s.getInt('negative_volume')
-      })
-      const latest = negVols[0]
-      const baseline = negVols.slice(1)
-
-      const mean =
-        baseline.reduce(function (a, b) {
-          return a + b
-        }, 0) / baseline.length
-      const variance =
-        baseline.reduce(function (a, b) {
-          return a + Math.pow(b - mean, 2)
-        }, 0) / baseline.length
-      const std = Math.sqrt(variance)
-
-      const zScore = std > 0 ? (latest - mean) / std : 0
-
-      const window = Math.min(7, baseline.length)
-      const movingAvg =
-        baseline.slice(0, window).reduce(function (a, b) {
-          return a + b
-        }, 0) / window
-
-      let ewma = baseline[baseline.length - 1]
-      const alpha = 0.3
-      for (let i = baseline.length - 2; i >= 0; i--) {
-        ewma = alpha * baseline[i] + (1 - alpha) * ewma
+      if (!mandateId) {
+        return e.badRequestError('mandate_id is required')
       }
 
-      let cusumPos = 0
-      const k = std * 0.5
-      for (const v of baseline) {
-        cusumPos = Math.max(0, cusumPos + v - mean - k)
+      let mentions = []
+      try {
+        mentions = $app.findRecordsByFilter(
+          'social_mentions',
+          'mandate_id = {:mid}',
+          '-created',
+          100,
+          0,
+          { mid: mandateId },
+        )
+      } catch (fetchErr) {
+        $app.logger().error('anomaly: fetch mentions failed', 'error', String(fetchErr))
       }
-      const cusumLatest = Math.max(0, cusumPos + latest - mean - k)
 
       const anomalies = []
-      if (zScore > 2)
-        anomalies.push({
-          algorithm: 'Z-Score',
-          value: Math.round(zScore * 100) / 100,
-          threshold: 2,
-        })
-      if (latest > movingAvg * 2)
-        anomalies.push({
-          algorithm: 'Moving Average',
-          value: latest,
-          threshold: Math.round(movingAvg * 2),
-        })
-      if (latest > ewma * 2)
-        anomalies.push({ algorithm: 'EWMA', value: latest, threshold: Math.round(ewma * 2) })
-      if (cusumLatest > cusumPos * 3 && cusumLatest > 50)
-        anomalies.push({
-          algorithm: 'CUSUM',
-          value: Math.round(cusumLatest),
-          threshold: Math.round(cusumPos * 3),
-        })
+      const recent = mentions.slice(0, 50)
 
-      let crisisTriggered = false
-      if (anomalies.length >= 2) {
-        try {
-          const detectRes = $http.send({
-            url: $os.getenv('PB_INSTANCE_URL') + '/backend/v1/crisis/detect',
-            method: 'POST',
-            headers: { Authorization: e.request.header.get('Authorization') || '' },
-            timeout: 15,
-          })
-          if (detectRes.statusCode === 200) {
-            const body = detectRes.json
-            crisisTriggered = body && body.alert_created
-          }
-        } catch (_) {}
+      if (recent.length > 20) {
+        anomalies.push({
+          type: 'volume_spike',
+          severity: 'high',
+          message: 'Volume de menções acima do normal',
+          count: recent.length,
+        })
+      }
+
+      const negativeRecent = recent.filter(function (m) {
+        return m.getString('sentiment') === 'negative'
+      })
+      if (negativeRecent.length > 10) {
+        anomalies.push({
+          type: 'negative_sentiment_surge',
+          severity: 'high',
+          message: 'Surto de sentimentos negativos detectado',
+          count: negativeRecent.length,
+        })
       }
 
       return e.json(200, {
-        success: true,
-        latest_negative: latest,
-        mean: Math.round(mean),
-        std: Math.round(std * 100) / 100,
-        z_score: Math.round(zScore * 100) / 100,
-        moving_avg: Math.round(movingAvg),
-        ewma: Math.round(ewma),
-        cusum: Math.round(cusumLatest),
-        anomalies_detected: anomalies.length,
-        anomalies: anomalies,
-        crisis_triggered: crisisTriggered,
+        mandate_id: mandateId,
+        anomalies,
+        total_anomalies: anomalies.length,
       })
     } catch (err) {
-      return e.json(500, { error: err.message })
+      $app.logger().error('anomaly detect failed', 'error', String(err))
+      return e.json(500, { error: 'Failed to detect anomalies' })
     }
   },
   $apis.requireAuth(),

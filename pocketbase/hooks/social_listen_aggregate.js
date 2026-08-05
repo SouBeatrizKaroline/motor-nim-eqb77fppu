@@ -3,70 +3,65 @@ routerAdd(
   '/backend/v1/social/aggregate',
   (e) => {
     try {
-      const snaps = $app.findRecordsByFilter('vtracker_snapshots', '', '-created', 7, 0)
-      const demands = $app.findRecordsByFilter('demands', '', '-negative_volume', 20, 0)
-      const topics = $app.findRecordsByFilter('social_topics', 'active=true', '', 50, 0)
+      const body = e.requestInfo().body || {}
+      const mandateId = body.mandate_id || body.mandateId
 
-      if (!snaps.length) return e.json(200, { success: false, reason: 'Sem snapshots' })
-
-      const latest = snaps[0]
-      const terms = latest.get('emerging_terms') || []
-      const insightCol = $app.findCollectionByNameOrId('strategic_insights')
-      const created = []
-
-      for (const t of terms) {
-        if (!t || !t.term) continue
-        const title = 'Tópico emergente: ' + t.term
-        try {
-          $app.findFirstRecordByData('strategic_insights', 'title', title)
-        } catch (_) {
-          const r = new Record(insightCol)
-          r.set('module', 'social')
-          r.set('title', title)
-          r.set(
-            'summary',
-            "Termo '" +
-              t.term +
-              "' com delta de crescimento " +
-              t.delta +
-              'x e ' +
-              (t.mentions || 0) +
-              ' menções.',
-          )
-          r.set('type', 'trend')
-          r.set('confidence', Math.min(95, Math.round((t.delta || 1) * 25)))
-          r.set('source_data', { term: t.term, delta: t.delta, mentions: t.mentions })
-          $app.save(r)
-          created.push(title)
-        }
+      if (!mandateId) {
+        return e.badRequestError('mandate_id is required')
       }
 
-      for (const d of demands.slice(0, 3)) {
-        const title = 'Demanda em alta: ' + d.getString('title').substring(0, 60)
-        try {
-          $app.findFirstRecordByData('strategic_insights', 'title', title)
-        } catch (_) {
-          const r = new Record(insightCol)
-          r.set('module', 'social')
-          r.set('title', title)
-          r.set('summary', d.getString('description'))
-          r.set('type', 'risk')
-          r.set('confidence', Math.min(90, d.getInt('negative_volume') / 5))
-          r.set('source_data', { demand_id: d.id, negative_volume: d.getInt('negative_volume') })
-          $app.save(r)
-          created.push(title)
-        }
+      let mentions = []
+      try {
+        mentions = $app.findRecordsByFilter(
+          'social_mentions',
+          'mandate_id = {:mid}',
+          '-created',
+          500,
+          0,
+          { mid: mandateId },
+        )
+      } catch (fetchErr) {
+        $app.logger().error('social aggregate: fetch failed', 'error', String(fetchErr))
       }
+
+      const sentimentCounts = { positive: 0, negative: 0, neutral: 0 }
+      const sourceCounts = {}
+      const termCounts = {}
+      let totalReach = 0
+
+      for (const m of mentions) {
+        const sentiment = m.getString('sentiment') || 'neutral'
+        if (sentimentCounts[sentiment] !== undefined) sentimentCounts[sentiment]++
+
+        const source = m.getString('source') || 'unknown'
+        sourceCounts[source] = (sourceCounts[source] || 0) + 1
+
+        const term = m.getString('term') || m.getString('keyword') || ''
+        if (term) termCounts[term] = (termCounts[term] || 0) + 1
+
+        totalReach += m.getInt('reach') || 0
+      }
+
+      const topTerms = Object.keys(termCounts)
+        .map(function (term) {
+          return { term: term, count: termCounts[term] }
+        })
+        .sort(function (a, b) {
+          return b.count - a.count
+        })
+        .slice(0, 10)
 
       return e.json(200, {
-        success: true,
-        insights_created: created.length,
-        insights: created,
-        topics_monitored: topics.length,
-        demands_analyzed: demands.length,
+        mandate_id: mandateId,
+        total_mentions: mentions.length,
+        sentiment: sentimentCounts,
+        sources: sourceCounts,
+        top_terms: topTerms,
+        total_reach: totalReach,
       })
     } catch (err) {
-      return e.json(500, { error: err.message })
+      $app.logger().error('social aggregate failed', 'error', String(err))
+      return e.json(500, { error: 'Failed to aggregate social listening data' })
     }
   },
   $apis.requireAuth(),

@@ -4,74 +4,70 @@ routerAdd(
   (e) => {
     try {
       const body = e.requestInfo().body || {}
-      const period = body.period || 'daily'
+      const mandateId = body.mandate_id || body.mandateId
 
-      const alerts = $app.findRecordsByFilter(
-        'crisis_alerts',
-        "status != 'resolvido' && status != 'descartado'",
-        '-created',
-        5,
-        0,
-      )
-      const scores = $app.findRecordsByFilter('reputation_scores', '', '-date', 7, 0)
-      const preds = $app.findRecordsByFilter('predictions', '', '-created', 5, 0)
-      const insights = $app.findRecordsByFilter('strategic_insights', '', '-created', 10, 0)
-
-      let context = 'RESUMO EXECUTIVO (' + period.toUpperCase() + ')\n\n'
-      context += 'Alertas ativos: ' + alerts.length + '\n'
-      for (const a of alerts) {
-        context +=
-          '- [' + a.getString('severity') + '] ' + a.getString('summary').substring(0, 100) + '\n'
-      }
-      context +=
-        '\nReputação (PRS): ' + (scores.length > 0 ? scores[0].getInt('prs_score') : 'N/A') + '\n'
-      context += 'Predições: ' + preds.length + '\n'
-      for (const p of preds) {
-        context +=
-          '- ' +
-          p.getString('metric') +
-          ' (' +
-          p.getString('timeframe') +
-          '): ' +
-          p.getString('predicted_value') +
-          ' [confiança: ' +
-          p.getInt('confidence') +
-          '%]\n'
-      }
-      context += '\nInsights estratégicos: ' + insights.length + '\n'
-      for (const i of insights) {
-        context += '- [' + i.getString('type') + '] ' + i.getString('title').substring(0, 80) + '\n'
+      if (!mandateId) {
+        return e.badRequestError('mandate_id is required')
       }
 
-      let summary = ''
+      let mentions = []
       try {
-        const aiRes = $ai.chat({
-          model: 'fast',
-          messages: [
-            {
-              role: 'system',
-              content:
-                'Você é um assistente executivo de inteligência política. Gere um resumo executivo conciso e acionável em português.',
-            },
-            {
-              role: 'user',
-              content: 'Gere um resumo executivo ' + period + ' com base nos dados:\n\n' + context,
-            },
-          ],
-        })
-        summary = aiRes.choices[0].message.content
-      } catch (aiErr) {
-        summary =
-          'Resumo automático temporariamente indisponível. ' +
-          alerts.length +
-          ' alertas ativos, PRS: ' +
-          (scores.length > 0 ? scores[0].getInt('prs_score') : 'N/A') +
-          '.'
+        mentions = $app.findRecordsByFilter(
+          'social_mentions',
+          'mandate_id = {:mid}',
+          '-created',
+          50,
+          0,
+          { mid: mandateId },
+        )
+      } catch (fetchErr) {
+        $app.logger().error('exec summary: fetch mentions failed', 'error', String(fetchErr))
       }
 
-      return e.json(200, { success: true, period: period, summary: summary })
+      let alerts = []
+      try {
+        alerts = $app.findRecordsByFilter('alerts', 'mandate_id = {:mid}', '-created', 10, 0, {
+          mid: mandateId,
+        })
+      } catch (fetchErr) {
+        $app.logger().error('exec summary: fetch alerts failed', 'error', String(fetchErr))
+      }
+
+      const context =
+        'Menções recentes: ' + mentions.length + '. Alertas ativos: ' + alerts.length + '.'
+
+      const reply = $ai.chat({
+        model: 'fast',
+        messages: [
+          {
+            role: 'system',
+            content:
+              'Você é um copiloto executivo para inteligência política. Gere um resumo executivo conciso em português.',
+          },
+          {
+            role: 'user',
+            content: 'Gere um resumo executivo com base nos seguintes dados: ' + context,
+          },
+        ],
+      })
+
+      return e.json(200, {
+        mandate_id: mandateId,
+        summary: reply.choices[0].message.content,
+        mentions_count: mentions.length,
+        alerts_count: alerts.length,
+      })
     } catch (err) {
-      return e.json(500, { error: err.message })
+      if (err instanceof SkipAiConfigError)
+        return e.json(503, { error: 'AI temporariamente indisponível' })
+      if (err instanceof SkipAiError) {
+        const status = err.status || 502
+        return e.json(status, {
+          error: status >= 500 ? 'AI temporariamente indisponível' : err.message,
+        })
+      }
+      $app.logger().error('executive summary failed', 'error', String(err))
+      return e.json(500, { error: 'Failed to generate executive summary' })
     }
   },
   $apis.requireAuth(),

@@ -4,64 +4,69 @@ routerAdd(
   (e) => {
     try {
       const body = e.requestInfo().body || {}
-      const title = body.title || ''
-      const type = body.type || 'post'
-      const tema = body.tema || ''
-      const briefing = body.briefing || ''
+      const mandateId = body.mandate_id || body.mandateId
+      const topic = body.topic || ''
+
+      if (!mandateId) {
+        return e.badRequestError('mandate_id is required')
+      }
+
+      let mentions = []
+      try {
+        mentions = $app.findRecordsByFilter(
+          'social_mentions',
+          'mandate_id = {:mid}',
+          '-created',
+          50,
+          0,
+          { mid: mandateId },
+        )
+      } catch (fetchErr) {
+        $app.logger().error('content suggest: fetch failed', 'error', String(fetchErr))
+      }
+
+      const topTerms = []
+      for (const m of mentions) {
+        const term = m.getString('term') || m.getString('keyword') || ''
+        if (term && topTerms.indexOf(term) === -1) topTerms.push(term)
+        if (topTerms.length >= 10) break
+      }
 
       const prompt =
-        'Sugira para o conteúdo a seguir (formato JSON válido, sem markdown):\n' +
-        'Título: ' +
-        title +
-        '\nTipo: ' +
-        type +
-        '\nTema: ' +
-        tema +
-        '\nBriefing: ' +
-        briefing +
-        '\n\n' +
-        'Esquema:\n{"best_time":"horário","format":"formato","cta":"chamada","hashtag":"#tags","thumbnail":"descrição","title":"título otimizado","copy":"legenda","duration":"segundos","frequency":"frequência sugerida"}'
+        'Você é um assessor de comunicação política. Termos em alta: ' +
+        topTerms.join(', ') +
+        '. Sugira 3 conteúdos sobre: ' +
+        (topic || 'atualidades') +
+        '. Responda em JSON com array de {titulo, descricao, hashtags}.'
 
-      let suggestions = null
-      try {
-        const aiRes = $ai.chat({
-          model: 'fast',
-          messages: [
-            {
-              role: 'system',
-              content:
-                'Você é um especialista em marketing digital e conteúdo para redes sociais. Responda apenas em JSON válido.',
-            },
-            { role: 'user', content: prompt },
-          ],
-        })
-        const raw = aiRes.choices[0].message.content
-        const start = raw.indexOf('{')
-        const end = raw.lastIndexOf('}')
-        if (start !== -1 && end !== -1) {
-          suggestions = JSON.parse(raw.substring(start, end + 1))
-        }
-      } catch (aiErr) {
-        $app.logger().error('Content suggest AI error: ' + aiErr.message)
-      }
+      const reply = $ai.chat({
+        model: 'fast',
+        messages: [
+          {
+            role: 'system',
+            content:
+              'Você é um assessor de comunicação política brasileiro. Responda sempre em português.',
+          },
+          { role: 'user', content: prompt },
+        ],
+      })
 
-      if (!suggestions) {
-        suggestions = {
-          best_time: '18h-20h',
-          format: type,
-          cta: 'Comente sua opinião!',
-          hashtag: '#MandatoPopular #SaúdePública',
-          thumbnail: 'Imagem impactante com texto em destaque',
-          title: title,
-          copy: 'Conteúdo sobre ' + tema,
-          duration: '30-60s',
-          frequency: '3x por semana',
-        }
-      }
-
-      return e.json(200, { success: true, suggestions })
+      return e.json(200, {
+        mandate_id: mandateId,
+        suggestions: reply.choices[0].message.content,
+        top_terms: topTerms,
+      })
     } catch (err) {
-      return e.json(500, { error: err.message })
+      if (err instanceof SkipAiConfigError)
+        return e.json(503, { error: 'AI temporariamente indisponível' })
+      if (err instanceof SkipAiError) {
+        const status = err.status || 502
+        return e.json(status, {
+          error: status >= 500 ? 'AI temporariamente indisponível' : err.message,
+        })
+      }
+      $app.logger().error('content suggest failed', 'error', String(err))
+      return e.json(500, { error: 'Failed to generate content suggestions' })
     }
   },
   $apis.requireAuth(),

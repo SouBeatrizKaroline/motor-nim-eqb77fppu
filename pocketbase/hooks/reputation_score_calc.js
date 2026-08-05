@@ -1,62 +1,59 @@
 routerAdd(
-  'GET',
-  '/backend/v1/reputation-score',
+  'POST',
+  '/backend/v1/reputation/calculate',
   (e) => {
     try {
-      let snapshots = []
+      const body = e.requestInfo().body || {}
+      const mandateId = body.mandate_id || body.mandateId
+
+      if (!mandateId) {
+        return e.badRequestError('mandate_id is required')
+      }
+
+      let mentions = []
       try {
-        snapshots = $app.findRecordsByFilter('vtracker_snapshots', '', '-created', 30, 0)
-      } catch (_) {}
-
-      if (!snapshots || snapshots.length === 0) {
-        return e.json(200, { score: 50, label: 'neutro', trend: 'estável', history: [] })
+        mentions = $app.findRecordsByFilter(
+          'social_mentions',
+          'mandate_id = {:mid}',
+          '-created',
+          200,
+          0,
+          { mid: mandateId },
+        )
+      } catch (fetchErr) {
+        $app.logger().error('reputation: fetch mentions failed', 'error', String(fetchErr))
       }
 
-      const recent = snapshots.slice(0, 7)
-      let totalScore = 0
-      const history = []
+      let positive = 0
+      let negative = 0
+      let neutral = 0
+      let totalReach = 0
 
-      for (const snap of recent) {
-        const polarity = snap.getFloat('polarity_index') || 0
-        const volume = snap.getFloat('mention_volume') || 0
-        const negative = snap.getFloat('negative_volume') || 0
-
-        const negRatio = volume > 0 ? negative / volume : 0
-        const score = Math.max(0, Math.min(100, 50 + polarity * 50 - negRatio * 20))
-        totalScore += score
-
-        history.push({
-          date: snap.getString('window_start'),
-          score: Math.round(score),
-          polarity: polarity,
-          volume: volume,
-        })
+      for (const m of mentions) {
+        const sentiment = m.getString('sentiment') || 'neutral'
+        const reach = m.getInt('reach') || 0
+        totalReach += reach
+        if (sentiment === 'positive') positive++
+        else if (sentiment === 'negative') negative++
+        else neutral++
       }
 
-      const avgScore = Math.round(totalScore / recent.length)
-      let label = 'neutro'
-      if (avgScore >= 70) label = 'positivo'
-      else if (avgScore >= 55) label = 'levemente positivo'
-      else if (avgScore <= 30) label = 'crítico'
-      else if (avgScore <= 45) label = 'negativo'
+      const total = mentions.length || 1
+      const rawScore = 50 + ((positive - negative) / total) * 50
+      const score = Math.max(0, Math.min(100, Math.round(rawScore)))
 
-      let trend = 'estável'
-      if (history.length >= 2) {
-        const halfIdx = Math.min(3, history.length)
-        const recentAvg = history.slice(0, halfIdx).reduce((s, h) => s + h.score, 0) / halfIdx
-        const olderCount = history.length - halfIdx
-        const olderAvg =
-          olderCount > 0
-            ? history.slice(halfIdx).reduce((s, h) => s + h.score, 0) / olderCount
-            : recentAvg
-        if (recentAvg > olderAvg + 3) trend = 'melhorando'
-        else if (recentAvg < olderAvg - 3) trend = 'piorando'
-      }
-
-      return e.json(200, { score: avgScore, label, trend, history })
+      return e.json(200, {
+        mandate_id: mandateId,
+        score,
+        positive,
+        negative,
+        neutral,
+        total_mentions: mentions.length,
+        total_reach: totalReach,
+      })
     } catch (err) {
-      $app.logger().error('reputation score calc failed', 'error', String(err))
-      return e.json(500, { error: 'failed to calculate reputation score' })
+      $app.logger().error('reputation calc failed', 'error', String(err))
+      return e.json(500, { error: 'Failed to calculate reputation score' })
     }
   },
   $apis.requireAuth(),
