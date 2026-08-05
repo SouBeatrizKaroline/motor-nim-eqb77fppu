@@ -16,10 +16,12 @@ interface ChatMessage {
 }
 
 const SUGGESTED_PROMPTS = [
-  'Resuma os últimos alertas de crise',
-  'Gere ideias de pauta para redes sociais',
-  'Quais demandas estão em alta?',
-  'Sugira um discurso sobre saúde pública',
+  'Quais temas tiveram maior crescimento esta semana?',
+  'Quais publicações tiveram melhor desempenho e por quê?',
+  'Quais horários e formatos geram mais engajamento?',
+  'Sugira oportunidades de pauta com base nas tendências atuais',
+  'Como evoluiu a percepção pública recente? Quais os riscos?',
+  'Quais temas merecem monitoramento prioritário e quais recomendações você sugere?',
 ]
 
 export default function Assistente() {
@@ -94,8 +96,12 @@ export default function Assistente() {
             <Bot className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h2 className="text-xl font-black text-white tracking-wide">Copiloto Estratégico</h2>
-            <p className="text-xs text-slate-400">Inteligência estratégica à sua disposição</p>
+            <h2 className="text-xl font-black text-white tracking-wide">
+              Copiloto Estratégico Imagis
+            </h2>
+            <p className="text-xs text-slate-400">
+              Especialista em marketing político, comunicação institucional e inteligência de dados
+            </p>
           </div>
         </div>
         <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
@@ -112,10 +118,13 @@ export default function Assistente() {
                 <div className="p-4 rounded-2xl bg-slate-800/60 mb-4">
                   <Bot className="w-10 h-10 text-cyan-400" />
                 </div>
-                <h3 className="text-lg font-bold text-slate-200 mb-2">Como posso ajudar hoje?</h3>
+                <h3 className="text-lg font-bold text-slate-200 mb-2">
+                  Análise Estratégica com IA
+                </h3>
                 <p className="text-sm text-slate-400 max-w-md mb-6">
-                  Posso analisar alertas, sugerir discursos, criar roteiros e identificar demandas
-                  relevantes para o mandato.
+                  Atuo como uma equipe multidisciplinar de comunicação, marketing político e análise
+                  de dados. Forneço relatórios executivos com descobertas, indicadores, tendências,
+                  oportunidades e recomendações fundamentadas.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-lg">
                   {SUGGESTED_PROMPTS.map((prompt) => (
@@ -155,10 +164,10 @@ export default function Assistente() {
                     </div>
                     <div
                       className={cn(
-                        'rounded-2xl px-4 py-3 max-w-[80%] text-sm leading-relaxed whitespace-pre-wrap',
+                        'rounded-2xl px-4 py-3 max-w-[85%] text-sm leading-relaxed whitespace-pre-wrap',
                         msg.role === 'user'
                           ? 'bg-indigo-600/20 text-slate-100 border border-indigo-500/20'
-                          : 'bg-slate-800/80 text-slate-200 border border-slate-700',
+                          : 'bg-slate-800/80 text-slate-200 border border-slate-700 shadow-md',
                       )}
                     >
                       {msg.content}

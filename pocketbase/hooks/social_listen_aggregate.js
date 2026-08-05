@@ -3,61 +3,78 @@ routerAdd(
   '/backend/v1/social/aggregate',
   (e) => {
     try {
-      const body = e.requestInfo().body || {}
-      const mandateId = body.mandate_id || body.mandateId
-
-      if (!mandateId) {
-        return e.badRequestError('mandate_id is required')
-      }
-
-      let mentions = []
+      let snapshots = []
       try {
-        mentions = $app.findRecordsByFilter(
-          'social_mentions',
-          'mandate_id = {:mid}',
-          '-created',
-          500,
-          0,
-          { mid: mandateId },
-        )
+        snapshots = $app.findRecordsByFilter('vtracker_snapshots', "id != ''", '-created', 50, 0)
       } catch (fetchErr) {
         $app.logger().error('social aggregate: fetch failed', 'error', String(fetchErr))
       }
 
-      const sentimentCounts = { positive: 0, negative: 0, neutral: 0 }
-      const sourceCounts = {}
-      const termCounts = {}
-      let totalReach = 0
+      var sentimentCounts = { positive: 0, negative: 0, neutral: 0 }
+      var totalReach = 0
+      var totalMentions = 0
+      var polarityValues = []
+      var termCounts = {}
 
-      for (const m of mentions) {
-        const sentiment = m.getString('sentiment') || 'neutral'
-        if (sentimentCounts[sentiment] !== undefined) sentimentCounts[sentiment]++
+      for (var i = 0; i < snapshots.length; i++) {
+        var pos = snapshots[i].getInt('positive_volume') || 0
+        var neg = snapshots[i].getInt('negative_volume') || 0
+        var neu = snapshots[i].getInt('neutral_volume') || 0
+        var mentions = snapshots[i].getInt('mention_volume') || 0
+        var polarity = snapshots[i].getFloat('polarity_index') || 0
 
-        const source = m.getString('source') || 'unknown'
-        sourceCounts[source] = (sourceCounts[source] || 0) + 1
+        sentimentCounts.positive += pos
+        sentimentCounts.negative += neg
+        sentimentCounts.neutral += neu
+        totalMentions += mentions
+        totalReach += mentions
+        polarityValues.push(polarity)
 
-        const term = m.getString('term') || m.getString('keyword') || ''
-        if (term) termCounts[term] = (termCounts[term] || 0) + 1
-
-        totalReach += m.getInt('reach') || 0
+        var termsRaw = snapshots[i].get('emerging_terms')
+        if (termsRaw) {
+          var terms = termsRaw
+          if (typeof terms === 'string') {
+            try {
+              terms = JSON.parse(terms)
+            } catch (_) {}
+          }
+          if (Array.isArray(terms)) {
+            for (var j = 0; j < terms.length; j++) {
+              var term =
+                typeof terms[j] === 'string'
+                  ? terms[j]
+                  : terms[j] && terms[j].term
+                    ? terms[j].term
+                    : ''
+              if (term) termCounts[term] = (termCounts[term] || 0) + 1
+            }
+          }
+        }
       }
 
-      const topTerms = Object.keys(termCounts)
+      var topTerms = Object.keys(termCounts)
         .map(function (term) {
           return { term: term, count: termCounts[term] }
         })
         .sort(function (a, b) {
           return b.count - a.count
         })
-        .slice(0, 10)
+        .slice(0, 15)
+
+      var avgPolarity = 0
+      if (polarityValues.length > 0) {
+        var sum = 0
+        for (var p = 0; p < polarityValues.length; p++) sum += polarityValues[p]
+        avgPolarity = Math.round((sum / polarityValues.length) * 100) / 100
+      }
 
       return e.json(200, {
-        mandate_id: mandateId,
-        total_mentions: mentions.length,
+        total_mentions: totalMentions,
         sentiment: sentimentCounts,
-        sources: sourceCounts,
         top_terms: topTerms,
         total_reach: totalReach,
+        avg_polarity: avgPolarity,
+        snapshots_analyzed: snapshots.length,
       })
     } catch (err) {
       $app.logger().error('social aggregate failed', 'error', String(err))

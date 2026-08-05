@@ -46,18 +46,22 @@ export const getNotifications = () =>
 
 export const getSettingsRecord = async () => {
   try {
-    return await pb.collection('settings').getFirstListItem('key="motor_imagis"')
+    return await pb.collection('settings').getFirstListItem('key="imagis"')
   } catch (_) {
-    return null
+    try {
+      return await pb.collection('settings').getFirstListItem('key="motor_imagis"')
+    } catch (__) {
+      return null
+    }
   }
 }
 
 export const saveSettingsRecord = async (value: Settings) => {
   const existing = await getSettingsRecord()
   if (existing) {
-    return pb.collection('settings').update(existing.id, { value })
+    return pb.collection('settings').update(existing.id, { key: 'imagis', value })
   }
-  return pb.collection('settings').create({ key: 'motor_imagis', value })
+  return pb.collection('settings').create({ key: 'imagis', value })
 }
 
 export const triggerVTrackerIngest = (manual = false, data?: any) =>

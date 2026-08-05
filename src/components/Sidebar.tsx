@@ -35,8 +35,10 @@ export function Sidebar() {
             I
           </div>
           <div className="flex flex-col">
-            <span className="font-bold text-sm leading-tight tracking-wide">MOTOR IMAGIS</span>
-            <span className="text-[10px] text-muted-foreground font-mono">Imagis Engine</span>
+            <span className="font-bold text-sm leading-tight tracking-wide">IMAGIS</span>
+            <span className="text-[10px] text-muted-foreground font-mono">
+              Inteligência Estratégica
+            </span>
           </div>
         </Link>
       </div>
@@ -90,7 +92,7 @@ export function Sidebar() {
             <span className="font-medium text-foreground">Status do Sistema</span>
             <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
           </div>
-          <p className="text-muted-foreground text-[11px]">V-Tracker & Imagis Conectados</p>
+          <p className="text-muted-foreground text-[11px]">Imagis & V-Tracker Conectados</p>
         </div>
       </div>
     </aside>

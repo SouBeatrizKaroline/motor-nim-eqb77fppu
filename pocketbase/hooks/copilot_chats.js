@@ -9,7 +9,7 @@ routerAdd(
         parseInt(e.requestInfo().query ? e.requestInfo().query.limit || '20' : '20', 10) || 20
       return e.json(
         200,
-        $ai.agent('nim-copiloto').listConversations({ user_id: userId, limit: limit }),
+        $ai.agent('imagis-copiloto').listConversations({ user_id: userId, limit: limit }),
       )
     } catch (err) {
       if (err instanceof SkipAiAgentsError) {

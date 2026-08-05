@@ -4,45 +4,78 @@ routerAdd(
   (e) => {
     try {
       const body = e.requestInfo().body || {}
-      const mandateId = body.mandate_id || body.mandateId
+      const period = body.period || 'daily'
 
-      if (!mandateId) {
-        return e.badRequestError('mandate_id is required')
-      }
-
-      let mentions = []
+      let snapshots = []
       try {
-        mentions = $app.findRecordsByFilter(
-          'social_mentions',
-          'mandate_id = {:mid}',
-          '-created',
-          50,
-          0,
-          { mid: mandateId },
-        )
+        snapshots = $app.findRecordsByFilter('vtracker_snapshots', "id != ''", '-created', 20, 0)
       } catch (fetchErr) {
-        $app.logger().error('exec summary: fetch mentions failed', 'error', String(fetchErr))
+        $app.logger().error('exec summary: fetch snapshots failed', 'error', String(fetchErr))
       }
 
       let alerts = []
       try {
-        alerts = $app.findRecordsByFilter('alerts', 'mandate_id = {:mid}', '-created', 10, 0, {
-          mid: mandateId,
-        })
+        alerts = $app.findRecordsByFilter(
+          'crisis_alerts',
+          "status != 'resolvido' && status != 'descartado'",
+          '-created',
+          10,
+          0,
+        )
       } catch (fetchErr) {
         $app.logger().error('exec summary: fetch alerts failed', 'error', String(fetchErr))
       }
 
-      const context =
-        'Menções recentes: ' + mentions.length + '. Alertas ativos: ' + alerts.length + '.'
+      let totalMentions = 0
+      let totalNegative = 0
+      let avgPolarity = 0
+      for (var i = 0; i < snapshots.length; i++) {
+        totalMentions += snapshots[i].getInt('mention_volume') || 0
+        totalNegative += snapshots[i].getInt('negative_volume') || 0
+        avgPolarity += snapshots[i].getFloat('polarity_index') || 0
+      }
+      if (snapshots.length > 0) avgPolarity = avgPolarity / snapshots.length
 
-      const reply = $ai.chat({
-        model: 'fast',
+      var emergingTerms = []
+      for (var j = 0; j < snapshots.length && emergingTerms.length < 10; j++) {
+        var termsRaw = snapshots[j].get('emerging_terms')
+        if (termsRaw) {
+          var terms = termsRaw
+          if (typeof terms === 'string') {
+            try {
+              terms = JSON.parse(terms)
+            } catch (_) {}
+          }
+          if (Array.isArray(terms)) {
+            for (var k = 0; k < terms.length && emergingTerms.length < 10; k++) {
+              var term =
+                typeof terms[k] === 'string'
+                  ? terms[k]
+                  : terms[k] && terms[k].term
+                    ? terms[k].term
+                    : ''
+              if (term && emergingTerms.indexOf(term) === -1) emergingTerms.push(term)
+            }
+          }
+        }
+      }
+
+      var context = 'Periodo: ' + period + '. '
+      context += 'Total de mencoes recentes: ' + totalMentions + '. '
+      context += 'Volume negativo: ' + totalNegative + '. '
+      context += 'Polaridade media: ' + Math.round(avgPolarity * 100) / 100 + '. '
+      context += 'Alertas ativos: ' + alerts.length + '. '
+      if (emergingTerms.length > 0) {
+        context += 'Termos em alta: ' + emergingTerms.join(', ') + '.'
+      }
+
+      var reply = $ai.chat({
+        model: 'reasoning',
         messages: [
           {
             role: 'system',
             content:
-              'Você é um copiloto executivo para inteligência política. Gere um resumo executivo conciso em português.',
+              'Voce e o Copiloto Estrategico Imagis. Gere um resumo executivo conciso em portugues brasileiro, estruturado com: 1) Resumo Executivo, 2) Principais Descobertas, 3) Indicadores, 4) Tendencias, 5) Pontos de Atencao, 6) Recomendacoes. Use Markdown. Diferencie dados observados de inferencias do modelo.',
           },
           {
             role: 'user',
@@ -52,18 +85,21 @@ routerAdd(
       })
 
       return e.json(200, {
-        mandate_id: mandateId,
+        period: period,
         summary: reply.choices[0].message.content,
-        mentions_count: mentions.length,
+        mentions_count: totalMentions,
+        negative_count: totalNegative,
+        avg_polarity: Math.round(avgPolarity * 100) / 100,
         alerts_count: alerts.length,
+        emerging_terms: emergingTerms,
       })
     } catch (err) {
       if (err instanceof SkipAiConfigError)
-        return e.json(503, { error: 'AI temporariamente indisponível' })
+        return e.json(503, { error: 'AI temporariamente indisponivel' })
       if (err instanceof SkipAiError) {
-        const status = err.status || 502
+        var status = err.status || 502
         return e.json(status, {
-          error: status >= 500 ? 'AI temporariamente indisponível' : err.message,
+          error: status >= 500 ? 'AI temporariamente indisponivel' : err.message,
         })
       }
       $app.logger().error('executive summary failed', 'error', String(err))

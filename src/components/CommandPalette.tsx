@@ -66,7 +66,7 @@ export function CommandPalette({ open: externalOpen, onOpenChange }: CommandPale
         <CommandGroup heading="Ações Rápidas do Núcleo Criativo">
           <CommandItem onSelect={() => runCommand(() => navigate('/estudio?action=generate'))}>
             <Wand2 className="mr-2 h-4 w-4 text-amber-500" />
-            <span>Gerar Novo Conteúdo com IA (CÓRTEX)</span>
+            <span>Gerar Novo Conteúdo com IA (Imagis)</span>
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => navigate('/estudio?tab=calendar'))}>
             <Calendar className="mr-2 h-4 w-4 text-emerald-500" />

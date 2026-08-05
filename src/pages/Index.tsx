@@ -127,7 +127,7 @@ export default function Index() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/60 p-6 rounded-2xl border border-slate-800">
         <div>
           <p className="text-xs font-semibold text-primary uppercase tracking-widest">
-            CENTRAL DE INTELIGÊNCIA ESTRATÉGICA
+            IMAGIS — INTELIGÊNCIA ESTRATÉGICA
           </p>
           <h2 className="text-2xl md:text-3xl font-extrabold text-white mt-1">
             Olá, {user?.name || 'Assessor'}
