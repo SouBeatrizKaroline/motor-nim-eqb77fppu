@@ -1,169 +1,98 @@
-import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import {
-  BrainCircuit,
   LayoutDashboard,
+  Brain,
   AlertTriangle,
   FileText,
   Video,
-  Wand2,
-  Coins,
+  Sparkles,
+  FileSpreadsheet,
   Bot,
   Settings,
-  LogOut,
-  X,
-  BarChart3,
 } from 'lucide-react'
-import { useAuth } from '@/hooks/use-auth'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { useRealtime } from '@/hooks/use-realtime'
-import { getCrisisAlerts } from '@/services/nim'
 import { cn } from '@/lib/utils'
 
-interface SidebarProps {
-  mobileOpen?: boolean
-  onCloseMobile?: () => void
-}
+const navItems = [
+  { name: 'Visão Geral', path: '/', icon: LayoutDashboard },
+  { name: 'Inteligência Estratégica', path: '/inteligencia', icon: Brain },
+  { name: 'Núcleo Criativo', path: '/estudio', icon: Sparkles, badge: 'CÓRTEX' },
+  { name: 'Alertas de Crise', path: '/alertas', icon: AlertTriangle },
+  { name: 'Gerador de Discursos', path: '/discursos', icon: FileText },
+  { name: 'Roteiros de Retenção', path: '/roteiros', icon: Video },
+  { name: 'Emendas & Demandas', path: '/emendas', icon: FileSpreadsheet },
+  { name: 'Copiloto Nim', path: '/assistente', icon: Bot },
+  { name: 'Configurações', path: '/configuracoes', icon: Settings },
+]
 
-export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
+export function Sidebar() {
   const location = useLocation()
-  const { user, signOut } = useAuth()
-  const [activeAlertsCount, setActiveAlertsCount] = useState(0)
 
-  const loadAlerts = async () => {
-    try {
-      const alerts = await getCrisisAlerts()
-      setActiveAlertsCount(
-        alerts.filter((a: any) => a.status !== 'resolvido' && a.status !== 'descartado').length,
-      )
-    } catch {
-      /* intentionally ignored */
-    }
-  }
-
-  useEffect(() => {
-    loadAlerts()
-  }, [])
-
-  useRealtime('crisis_alerts', () => loadAlerts())
-
-  const navItems = [
-    { label: 'Central de Comando', path: '/', icon: LayoutDashboard },
-    { label: 'Radar de Crises', path: '/alertas', icon: AlertTriangle, badge: activeAlertsCount },
-    { label: 'Estúdio de Discursos', path: '/discursos', icon: FileText },
-    { label: 'Estúdio de Conteúdo', path: '/roteiros', icon: Video },
-    { label: 'Núcleo Criativo', path: '/estudio', icon: Wand2 },
-    { label: 'Matching Orçamentário', path: '/emendas', icon: Coins },
-    { label: 'Inteligência', path: '/inteligencia', icon: BarChart3 },
-    { label: 'Copiloto Estratégico', path: '/assistente', icon: Bot },
-    { label: 'Configurações', path: '/configuracoes', icon: Settings },
-  ]
-
-  const content = (
-    <div className="flex flex-col h-full bg-card border-r border-border">
-      <div className="flex items-center justify-between h-16 px-6 border-b border-border">
-        <Link to="/" className="flex items-center space-x-3">
-          <div className="p-2 rounded-xl bg-gradient-to-tr from-teal-500 to-indigo-600 shadow-md shadow-teal-500/20">
-            <BrainCircuit className="w-5 h-5 text-white" />
+  return (
+    <aside className="flex h-screen w-64 flex-col border-r bg-card/60 backdrop-blur-md">
+      <div className="flex h-16 items-center border-b px-6">
+        <Link to="/" className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold shadow-md shadow-primary/20">
+            N
           </div>
-          <div>
-            <span className="text-lg font-black tracking-wider text-foreground">CÓRTEX</span>
-            <span className="block text-[10px] text-primary font-mono tracking-widest uppercase">
-              Inteligência Estratégica
-            </span>
+          <div className="flex flex-col">
+            <span className="font-bold text-sm leading-tight tracking-wide">MOTOR NIM</span>
+            <span className="text-[10px] text-muted-foreground font-mono">Núcleo Agêntico</span>
           </div>
         </Link>
-        {onCloseMobile && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onCloseMobile}
-            className="md:hidden text-muted-foreground"
-          >
-            <X className="w-5 h-5" />
-          </Button>
-        )}
       </div>
 
-      <div className="flex-1 py-6 px-4 space-y-1.5 overflow-y-auto">
+      <nav className="flex-1 space-y-1 p-4 overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon
           const isActive =
-            location.pathname === item.path ||
-            (item.path !== '/' && location.pathname.startsWith(item.path))
+            item.path === '/' ? location.pathname === '/' : location.pathname.startsWith(item.path)
+
           return (
             <Link
               key={item.path}
               to={item.path}
-              onClick={onCloseMobile}
               className={cn(
-                'flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all group',
+                'flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200',
                 isActive
-                  ? 'bg-primary/10 text-primary border border-primary/30'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted',
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground',
               )}
             >
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center gap-3">
                 <Icon
                   className={cn(
-                    'w-4 h-4 transition-colors',
-                    isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground',
+                    'h-4 w-4',
+                    isActive ? 'text-primary-foreground' : 'text-muted-foreground',
                   )}
                 />
-                <span>{item.label}</span>
+                <span>{item.name}</span>
               </div>
-              {item.badge !== undefined && item.badge > 0 && (
-                <Badge className="bg-destructive text-destructive-foreground text-[11px] font-bold px-1.5 py-0.5 rounded-full animate-pulse">
+              {item.badge && (
+                <span
+                  className={cn(
+                    'rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wider uppercase',
+                    isActive
+                      ? 'bg-primary-foreground/20 text-primary-foreground'
+                      : 'bg-amber-500/10 text-amber-500 border border-amber-500/20',
+                  )}
+                >
                   {item.badge}
-                </Badge>
+                </span>
               )}
             </Link>
           )
         })}
-      </div>
+      </nav>
 
-      <div className="p-4 border-t border-border">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3 overflow-hidden">
-            <div className="w-9 h-9 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center font-bold text-primary text-sm">
-              {user?.name?.[0]?.toUpperCase() || 'A'}
-            </div>
-            <div className="truncate">
-              <p className="text-xs font-bold text-foreground truncate">
-                {user?.name || 'Operador'}
-              </p>
-              <p className="text-[10px] text-muted-foreground truncate">{user?.email || ''}</p>
-            </div>
+      <div className="border-t p-4">
+        <div className="rounded-lg bg-muted/50 p-3 text-xs">
+          <div className="flex items-center justify-between mb-1">
+            <span className="font-medium text-foreground">Status do Sistema</span>
+            <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={signOut}
-            title="Sair"
-            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-          >
-            <LogOut className="w-4 h-4" />
-          </Button>
+          <p className="text-muted-foreground text-[11px]">V-Tracker & CÓRTEX Conectados</p>
         </div>
       </div>
-    </div>
-  )
-
-  return (
-    <>
-      <aside className="hidden md:block w-64 flex-shrink-0 h-screen sticky top-0">{content}</aside>
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 md:hidden flex">
-          <div
-            className="fixed inset-0 bg-background/80 backdrop-blur-sm"
-            onClick={onCloseMobile}
-          />
-          <div className="relative flex-1 w-full max-w-xs h-full z-10 animate-fade-in">
-            {content}
-          </div>
-        </div>
-      )}
-    </>
+    </aside>
   )
 }
