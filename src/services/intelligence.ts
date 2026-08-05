@@ -55,6 +55,20 @@ export const triggerContentSuggest = (data: any) =>
     body: JSON.stringify(data),
     headers: { 'Content-Type': 'application/json' },
   })
+
+export const triggerContentStudioGenerate = (data: {
+  content_type: string
+  platform: string
+  topic: string
+  tom_de_voz: string
+  contexto?: string
+  publico_alvo?: string
+}) =>
+  pb.send('/backend/v1/content-studio/generate', {
+    method: 'POST',
+    body: JSON.stringify(data),
+    headers: { 'Content-Type': 'application/json' },
+  })
 export const askCopilot = (message: string, conversationId?: string | null) =>
   pb.send('/backend/v1/copilot/ask', {
     method: 'POST',

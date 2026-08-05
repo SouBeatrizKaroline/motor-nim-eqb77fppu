@@ -8,6 +8,7 @@ const titleMap: Record<string, string> = {
   '/alertas': 'Radar de Crises',
   '/discursos': 'Estúdio de Discursos',
   '/roteiros': 'Estúdio de Conteúdo',
+  '/estudio': 'Núcleo Criativo',
   '/emendas': 'Matching Orçamentário',
   '/inteligencia': 'Central de Inteligência',
   '/assistente': 'Copiloto Estratégico',

@@ -20,6 +20,7 @@ import Alerts from './pages/Alerts'
 import AlertDetail from './pages/AlertDetail'
 import Discursos from './pages/Discursos'
 import Roteiros from './pages/Roteiros'
+import Estudio from './pages/Estudio'
 import Emendas from './pages/Emendas'
 import Assistente from './pages/Assistente'
 import Configuracoes from './pages/Configuracoes'
@@ -49,6 +50,7 @@ const App = () => (
                 <Route path="/alertas/:id" element={<AlertDetail />} />
                 <Route path="/discursos" element={<Discursos />} />
                 <Route path="/roteiros" element={<Roteiros />} />
+                <Route path="/estudio" element={<Estudio />} />
                 <Route path="/emendas" element={<Emendas />} />
                 <Route path="/assistente" element={<Assistente />} />
                 <Route path="/configuracoes" element={<Configuracoes />} />
