@@ -1,89 +1,62 @@
 routerAdd(
-  'POST',
-  '/backend/v1/reputation/calc',
+  'GET',
+  '/backend/v1/reputation-score',
   (e) => {
     try {
-      const snaps = $app.findRecordsByFilter('vtracker_snapshots', '', '-created', 10, 0)
-      const auds = $app.findRecordsByFilter('audience_snapshots', '', '-date', 10, 0)
-      if (!snaps.length)
-        return e.json(200, { success: false, reason: 'Sem snapshots do V-Tracker' })
+      let snapshots = []
+      try {
+        snapshots = $app.findRecordsByFilter('vtracker_snapshots', '', '-created', 30, 0)
+      } catch (_) {}
 
-      const latest = snaps[0]
-      const latestAud = auds.length > 0 ? auds[0] : null
-
-      const negVol = latest.getInt('negative_volume')
-      const posVol = latest.getInt('positive_volume')
-      const totalVol = latest.getInt('mention_volume') || 1
-      const polarity = latest.getFloat('polarity_index')
-
-      const sentiment = Math.round(((polarity + 1) / 2) * 100)
-      const reach = latestAud ? Math.min(100, Math.round(latestAud.getInt('reach') / 3000)) : 50
-      const engagement = latestAud
-        ? Math.min(100, Math.round(latestAud.getFloat('engagement_rate') * 10))
-        : 45
-      const trust = Math.round(((posVol / totalVol) * 100 + sentiment) / 2)
-      const authority = Math.min(100, Math.round(totalVol / 15))
-      const mentionFrequency = Math.min(100, Math.round(totalVol / 12))
-      const polarization = Math.round((Math.abs(negVol - posVol) / totalVol) * 100) / 100
-
-      let growthSum = 0,
-        growthCount = 0
-      for (let i = 1; i < auds.length; i++) {
-        growthSum += auds[i - 1].getInt('followers') - auds[i].getInt('followers')
-        growthCount++
+      if (!snapshots || snapshots.length === 0) {
+        return e.json(200, { score: 50, label: 'neutro', trend: 'estável', history: [] })
       }
-      const growthSpeed =
-        growthCount > 0 ? Math.max(0, Math.min(100, Math.round(growthSum / growthCount / 50))) : 10
 
-      const demands = $app.findRecordsByFilter('demands', '', '', 100, 0)
-      const regionalInfluence = Math.min(100, 40 + demands.length * 5)
+      const recent = snapshots.slice(0, 7)
+      let totalScore = 0
+      const history = []
 
-      const prsScore = Math.round(
-        (sentiment +
-          reach +
-          engagement +
-          trust +
-          authority +
-          mentionFrequency +
-          (100 - polarization * 50) +
-          growthSpeed +
-          regionalInfluence) /
-          9,
-      )
+      for (const snap of recent) {
+        const polarity = snap.getFloat('polarity_index') || 0
+        const volume = snap.getFloat('mention_volume') || 0
+        const negative = snap.getFloat('negative_volume') || 0
 
-      const col = $app.findCollectionByNameOrId('reputation_scores')
-      const rec = new Record(col)
-      const today = new Date().toISOString().split('T')[0]
-      rec.set('date', today)
-      rec.set('prs_score', prsScore)
-      rec.set('sentiment', sentiment)
-      rec.set('reach', reach)
-      rec.set('engagement', engagement)
-      rec.set('trust', trust)
-      rec.set('authority', authority)
-      rec.set('mention_frequency', mentionFrequency)
-      rec.set('polarization', polarization)
-      rec.set('growth_speed', growthSpeed)
-      rec.set('regional_influence', regionalInfluence)
-      $app.save(rec)
+        const negRatio = volume > 0 ? negative / volume : 0
+        const score = Math.max(0, Math.min(100, 50 + polarity * 50 - negRatio * 20))
+        totalScore += score
 
-      return e.json(200, {
-        success: true,
-        prs_score: prsScore,
-        components: {
-          sentiment,
-          reach,
-          engagement,
-          trust,
-          authority,
-          mentionFrequency,
-          polarization,
-          growthSpeed,
-          regionalInfluence,
-        },
-      })
+        history.push({
+          date: snap.getString('window_start'),
+          score: Math.round(score),
+          polarity: polarity,
+          volume: volume,
+        })
+      }
+
+      const avgScore = Math.round(totalScore / recent.length)
+      let label = 'neutro'
+      if (avgScore >= 70) label = 'positivo'
+      else if (avgScore >= 55) label = 'levemente positivo'
+      else if (avgScore <= 30) label = 'crítico'
+      else if (avgScore <= 45) label = 'negativo'
+
+      let trend = 'estável'
+      if (history.length >= 2) {
+        const halfIdx = Math.min(3, history.length)
+        const recentAvg = history.slice(0, halfIdx).reduce((s, h) => s + h.score, 0) / halfIdx
+        const olderCount = history.length - halfIdx
+        const olderAvg =
+          olderCount > 0
+            ? history.slice(halfIdx).reduce((s, h) => s + h.score, 0) / olderCount
+            : recentAvg
+        if (recentAvg > olderAvg + 3) trend = 'melhorando'
+        else if (recentAvg < olderAvg - 3) trend = 'piorando'
+      }
+
+      return e.json(200, { score: avgScore, label, trend, history })
     } catch (err) {
-      return e.json(500, { error: err.message })
+      $app.logger().error('reputation score calc failed', 'error', String(err))
+      return e.json(500, { error: 'failed to calculate reputation score' })
     }
   },
   $apis.requireAuth(),
