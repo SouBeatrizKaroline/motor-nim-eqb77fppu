@@ -52,10 +52,7 @@ export default function Assistente() {
     setLoading(true)
 
     try {
-      const result = await askNimAgent({
-        message,
-        conversation_id: conversationId,
-      })
+      const result = await askNimAgent(message, conversationId)
       if (result.conversation_id) {
         setConversationId(result.conversation_id)
       }
