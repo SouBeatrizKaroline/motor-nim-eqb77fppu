@@ -45,7 +45,8 @@ routerAdd(
         '  "discurso_completo": "Texto completo unificado do discurso para leitura contínua...",\n' +
         '  "pautas_abordadas": ' +
         JSON.stringify(pautas) +
-        '\n' +
+        ',\n' +
+        '  "fontes_utilizadas": [{"titulo":"","descricao":"","origem":"","fonte":"","link":"","data":"","categoria":"","confiabilidade":"","observacoes":""}]\n' +
         '}'
 
       let parsed = null
@@ -126,6 +127,30 @@ routerAdd(
         pipeRec.set('finished_at', new Date().toISOString())
         $app.save(pipeRec)
       } catch (_) {}
+
+      if (parsed.fontes_utilizadas && Array.isArray(parsed.fontes_utilizadas)) {
+        try {
+          var srcCol = $app.findCollectionByNameOrId('source_references')
+          for (var si = 0; si < parsed.fontes_utilizadas.length; si++) {
+            var fs = parsed.fontes_utilizadas[si]
+            if (!fs.titulo && !fs.fonte) continue
+            var srcRec = new Record(srcCol)
+            srcRec.set('title', fs.titulo || '')
+            srcRec.set('description', fs.descricao || '')
+            srcRec.set('origin', fs.origem || '')
+            srcRec.set('source', fs.fonte || '')
+            if (fs.link) srcRec.set('link', fs.link)
+            srcRec.set('collected_at', fs.data || new Date().toISOString().split('T')[0])
+            srcRec.set('category', fs.categoria || 'Discurso')
+            srcRec.set('reliability', fs.confiabilidade || 'média')
+            srcRec.set('source_type', 'especializada')
+            srcRec.set('observations', fs.observacoes || '')
+            srcRec.set('related_type', 'speech')
+            srcRec.set('related_id', rec.id)
+            $app.save(srcRec)
+          }
+        } catch (_) {}
+      }
 
       return e.json(200, {
         id: rec.id,

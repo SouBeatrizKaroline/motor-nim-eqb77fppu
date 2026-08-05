@@ -107,7 +107,33 @@ export const triggerAmendmentAnalyze = () =>
 export const triggerNotificationSend = (notificationId: string) =>
   pb.send(`/backend/v1/notifications/${notificationId}/send`, { method: 'POST' })
 
-export const askImagisAgent = (message: string, conversationId?: string | null) =>
+export interface AgentSourceReference {
+  id?: string
+  title: string
+  description: string
+  origin: string
+  source: string
+  link: string
+  collected_at: string
+  category: string
+  reliability: string
+  source_type?: string
+  observations: string
+}
+
+export interface AskAgentResult {
+  conversation_id: string
+  content: string
+  citations: any[]
+  message_id: string
+  sources: AgentSourceReference[]
+  is_audit: boolean
+}
+
+export const askImagisAgent = (
+  message: string,
+  conversationId?: string | null,
+): Promise<AskAgentResult> =>
   pb.send('/backend/v1/ask', {
     method: 'POST',
     body: JSON.stringify({ message, conversation_id: conversationId }),

@@ -1,27 +1,29 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Bot, Send, Sparkles, Loader2, User } from 'lucide-react'
+import { Bot, Send, Sparkles, Loader2, User, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
-import { askImagisAgent } from '@/services/imagis'
+import { useRealtime } from '@/hooks/use-realtime'
+import { askImagisAgent, type AskAgentResult, type AgentSourceReference } from '@/services/imagis'
+import { ProvenanceSection } from '@/components/ProvenanceSection'
 import { cn } from '@/lib/utils'
 
 interface ChatMessage {
   id: string
   role: 'user' | 'assistant'
   content: string
+  sources?: AgentSourceReference[]
+  is_audit?: boolean
 }
 
 const SUGGESTED_PROMPTS = [
   'Quais temas tiveram maior crescimento esta semana?',
   'Quais publicações tiveram melhor desempenho e por quê?',
-  'Quais horários e formatos geram mais engajamento?',
   'Sugira oportunidades de pauta com base nas tendências atuais',
   'Como evoluiu a percepção pública recente? Quais os riscos?',
-  'Quais temas merecem monitoramento prioritário e quais recomendações você sugere?',
 ]
 
 export default function Assistente() {
@@ -30,6 +32,7 @@ export default function Assistente() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [conversationId, setConversationId] = useState<string | null>(null)
+  const [sourceCount, setSourceCount] = useState(0)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = useCallback(() => {
@@ -40,37 +43,40 @@ export default function Assistente() {
     scrollToBottom()
   }, [messages, scrollToBottom])
 
+  useRealtime('source_references', () => {
+    setSourceCount((c) => c + 1)
+  })
+
   const handleSend = async (text?: string) => {
     const message = (text ?? input).trim()
     if (!message || loading) return
 
-    const userMsg: ChatMessage = {
-      id: crypto.randomUUID(),
-      role: 'user',
-      content: message,
-    }
-    setMessages((prev) => [...prev, userMsg])
+    setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: 'user', content: message }])
     setInput('')
     setLoading(true)
 
     try {
-      const result = await askImagisAgent(message, conversationId)
-      if (result.conversation_id) {
-        setConversationId(result.conversation_id)
-      }
-      const assistantMsg: ChatMessage = {
-        id: result.message_id || crypto.randomUUID(),
-        role: 'assistant',
-        content: result.content || 'Não foi possível obter uma resposta.',
-      }
-      setMessages((prev) => [...prev, assistantMsg])
+      const result: AskAgentResult = await askImagisAgent(message, conversationId)
+      if (result.conversation_id) setConversationId(result.conversation_id)
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: result.message_id || crypto.randomUUID(),
+          role: 'assistant',
+          content: result.content || 'Não foi possível obter uma resposta.',
+          sources: result.sources || [],
+          is_audit: result.is_audit || false,
+        },
+      ])
     } catch (err: any) {
-      const errorMsg: ChatMessage = {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: 'Ocorreu um erro ao processar sua solicitação. Tente novamente.',
-      }
-      setMessages((prev) => [...prev, errorMsg])
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: 'Ocorreu um erro ao processar sua solicitação. Tente novamente.',
+        },
+      ])
       toast({
         title: 'Erro de comunicação',
         description: err?.message || 'Falha ao consultar o assistente.',
@@ -88,6 +94,8 @@ export default function Assistente() {
     }
   }
 
+  const isAudit = input.trim().toUpperCase() === '/AUDITAR'
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -100,14 +108,22 @@ export default function Assistente() {
               Copiloto Estratégico Imagis
             </h2>
             <p className="text-xs text-slate-400">
-              Especialista em marketing político, comunicação institucional e inteligência de dados
+              Pesquisador, estrategista e analista com rastreabilidade de fontes
             </p>
           </div>
         </div>
-        <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-          <Sparkles className="w-3 h-3 mr-1" />
-          Online
-        </Badge>
+        <div className="flex gap-2">
+          {sourceCount > 0 && (
+            <Badge className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+              <Sparkles className="w-3 h-3 mr-1" />
+              {sourceCount} fontes rastreadas
+            </Badge>
+          )}
+          <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+            <Sparkles className="w-3 h-3 mr-1" />
+            Online
+          </Badge>
+        </div>
       </div>
 
       <Card className="border-slate-800 bg-slate-900/80 text-slate-100 flex flex-col h-[calc(100vh-220px)] min-h-[400px]">
@@ -122,9 +138,10 @@ export default function Assistente() {
                   Análise Estratégica com IA
                 </h3>
                 <p className="text-sm text-slate-400 max-w-md mb-6">
-                  Atuo como uma equipe multidisciplinar de comunicação, marketing político e análise
-                  de dados. Forneço relatórios executivos com descobertas, indicadores, tendências,
-                  oportunidades e recomendações fundamentadas.
+                  Atuo como pesquisador e estrategista. Cada análise inclui fontes rastreáveis e
+                  verificáveis. Digite{' '}
+                  <code className="text-cyan-400 bg-slate-800 px-1 rounded">/AUDITAR</code> para
+                  auditar a última resposta.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-lg">
                   {SUGGESTED_PROMPTS.map((prompt) => (
@@ -153,11 +170,15 @@ export default function Assistente() {
                         'w-8 h-8 rounded-full flex items-center justify-center shrink-0',
                         msg.role === 'user'
                           ? 'bg-indigo-600/30 border border-indigo-500/40'
-                          : 'bg-cyan-600/30 border border-cyan-500/40',
+                          : msg.is_audit
+                            ? 'bg-amber-600/30 border border-amber-500/40'
+                            : 'bg-cyan-600/30 border border-cyan-500/40',
                       )}
                     >
                       {msg.role === 'user' ? (
                         <User className="w-4 h-4 text-indigo-300" />
+                      ) : msg.is_audit ? (
+                        <ShieldCheck className="w-4 h-4 text-amber-300" />
                       ) : (
                         <Bot className="w-4 h-4 text-cyan-300" />
                       )}
@@ -167,10 +188,20 @@ export default function Assistente() {
                         'rounded-2xl px-4 py-3 max-w-[85%] text-sm leading-relaxed whitespace-pre-wrap',
                         msg.role === 'user'
                           ? 'bg-indigo-600/20 text-slate-100 border border-indigo-500/20'
-                          : 'bg-slate-800/80 text-slate-200 border border-slate-700 shadow-md',
+                          : msg.is_audit
+                            ? 'bg-amber-950/40 text-slate-200 border border-amber-700/30 shadow-md'
+                            : 'bg-slate-800/80 text-slate-200 border border-slate-700 shadow-md',
                       )}
                     >
+                      {msg.is_audit && (
+                        <div className="flex items-center gap-1.5 mb-2 text-xs font-bold text-amber-400">
+                          <ShieldCheck className="w-4 h-4" /> RELATÓRIO DE AUDITORIA
+                        </div>
+                      )}
                       {msg.content}
+                      {msg.sources && msg.sources.length > 0 && (
+                        <ProvenanceSection sources={msg.sources} />
+                      )}
                     </div>
                   </div>
                 ))}
@@ -195,18 +226,28 @@ export default function Assistente() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Digite sua mensagem..."
+                placeholder="Digite sua mensagem... (ou /AUDITAR para auditar)"
                 disabled={loading}
-                className="bg-slate-950/60 border-slate-800 text-slate-100 placeholder:text-slate-500 focus:border-cyan-500"
+                className={cn(
+                  'bg-slate-950/60 border-slate-800 text-slate-100 placeholder:text-slate-500',
+                  isAudit ? 'border-amber-500/50 focus:border-amber-500' : 'focus:border-cyan-500',
+                )}
               />
               <Button
                 onClick={() => handleSend()}
                 disabled={loading || !input.trim()}
-                className="bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-bold shrink-0"
+                className={cn(
+                  'font-bold shrink-0',
+                  isAudit
+                    ? 'bg-amber-500 hover:bg-amber-600 text-slate-950'
+                    : 'bg-cyan-500 hover:bg-cyan-600 text-slate-950',
+                )}
                 size="icon"
               >
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
+                ) : isAudit ? (
+                  <ShieldCheck className="w-4 h-4" />
                 ) : (
                   <Send className="w-4 h-4" />
                 )}
