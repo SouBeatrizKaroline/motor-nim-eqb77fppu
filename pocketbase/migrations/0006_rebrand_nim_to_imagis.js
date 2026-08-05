@@ -62,7 +62,7 @@ migrate(
         oldVal = rebrandJson(oldVal)
         oldSettings.set('key', 'motor_imagis')
         oldSettings.set('value', oldVal)
-        app.save(oldSettings)
+        app.saveNoValidate(oldSettings)
       }
     } catch (_) {}
 
@@ -81,7 +81,7 @@ migrate(
         }
         brandVal = rebrandJson(brandVal)
         brandRec.set('value', brandVal)
-        app.save(brandRec)
+        app.saveNoValidate(brandRec)
       }
     } catch (_) {}
 
@@ -184,18 +184,9 @@ migrate(
       demands: ['title', 'description', 'category', 'region'],
       budget_items: ['code', 'rubric_name', 'description', 'category'],
       amendment_reports: ['title', 'summary', 'methodology'],
-      pipeline_runs: ['stage', 'error'],
-      notifications: ['target', 'provider', 'error', 'related_type', 'related_id'],
-      content_items: ['title', 'idea', 'briefing', 'draft', 'campaign', 'channel'],
-      predictions: ['metric', 'timeframe', 'predicted_value', 'justification'],
-      strategic_insights: ['module', 'title', 'summary'],
-      social_topics: ['term'],
-      competitive_actors: ['name', 'role', 'region'],
-      brand_attributes: ['attribute', 'category', 'period'],
     }
 
     var jsonFields = {
-      vtracker_snapshots: ['emerging_terms', 'top_posts', 'source_raw'],
       crisis_alerts: [
         'trigger_metrics',
         'roteiro_video',
@@ -212,13 +203,6 @@ migrate(
       demands: ['source_terms'],
       budget_items: ['keywords'],
       amendment_reports: ['recommendations'],
-      pipeline_runs: ['input', 'output'],
-      notifications: ['payload'],
-      content_items: ['performance'],
-      competitive_actors: ['platforms'],
-      competitive_snapshots: ['top_themes'],
-      predictions: ['factors'],
-      strategic_insights: ['source_data'],
     }
 
     var allCols = Object.keys(textFields).concat(Object.keys(jsonFields))
@@ -235,7 +219,7 @@ migrate(
       var colName = uniqueCols[ci]
       var records = []
       try {
-        records = app.findRecordsByFilter(colName, "id != ''", 'created', 500, 0)
+        records = app.findRecordsByFilter(colName, "id != ''", '-created', 100, 0)
       } catch (_) {
         continue
       }
