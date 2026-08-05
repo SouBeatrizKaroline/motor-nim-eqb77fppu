@@ -20,6 +20,7 @@ import Discursos from './pages/Discursos'
 import Roteiros from './pages/Roteiros'
 import Emendas from './pages/Emendas'
 import Assistente from './pages/Assistente'
+import Configuracoes from './pages/Configuracoes'
 
 // ONLY IMPORT AND RENDER WORKING PAGES, NEVER ADD PLACEHOLDER COMPONENTS OR PAGES IN THIS FILE
 // AVOID REMOVING ANY CONTEXT PROVIDERS FROM THIS FILE (e.g. TooltipProvider, Toaster, Sonner)
@@ -46,6 +47,7 @@ const App = () => (
               <Route path="/roteiros" element={<Roteiros />} />
               <Route path="/emendas" element={<Emendas />} />
               <Route path="/assistente" element={<Assistente />} />
+              <Route path="/configuracoes" element={<Configuracoes />} />
               {/* ADD ALL CUSTOM ROUTES MUST BE ADDED HERE */}
             </Route>
           </Route>
