@@ -16,6 +16,7 @@ import ConfirmEmailChange from './pages/ConfirmEmailChange'
 import Layout from './components/Layout'
 import Alerts from './pages/Alerts'
 import AlertDetail from './pages/AlertDetail'
+import Discursos from './pages/Discursos'
 
 // ONLY IMPORT AND RENDER WORKING PAGES, NEVER ADD PLACEHOLDER COMPONENTS OR PAGES IN THIS FILE
 // AVOID REMOVING ANY CONTEXT PROVIDERS FROM THIS FILE (e.g. TooltipProvider, Toaster, Sonner)
@@ -38,6 +39,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/alertas" element={<Alerts />} />
               <Route path="/alertas/:id" element={<AlertDetail />} />
+              <Route path="/discursos" element={<Discursos />} />
               {/* ADD ALL CUSTOM ROUTES MUST BE ADDED HERE */}
             </Route>
           </Route>
