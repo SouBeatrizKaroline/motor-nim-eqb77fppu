@@ -85,7 +85,7 @@ export default function Inteligencia() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-white">Inteligência de Marketing Político</h2>
+        <h2 className="text-xl font-bold text-white">Central de Inteligência</h2>
         <Button
           onClick={handleCalc}
           disabled={calcLoading}

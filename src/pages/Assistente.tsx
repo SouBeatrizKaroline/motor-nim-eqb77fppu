@@ -94,8 +94,8 @@ export default function Assistente() {
             <Bot className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h2 className="text-xl font-black text-white tracking-wide">Assistente NIM</h2>
-            <p className="text-xs text-slate-400">Inteligência de mandato à sua disposição</p>
+            <h2 className="text-xl font-black text-white tracking-wide">Copiloto Estratégico</h2>
+            <p className="text-xs text-slate-400">Inteligência estratégica à sua disposição</p>
           </div>
         </div>
         <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">

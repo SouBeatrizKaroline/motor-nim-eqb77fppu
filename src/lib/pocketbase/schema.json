@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-05T13:44:42.233Z",
+  "generatedAt": "2026-08-05T14:14:24.308Z",
   "collections": [
     {
       "name": "users",
@@ -237,6 +237,66 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "executive_summary",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "timeline",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "risk_estimate",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "potential_reach",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "main_concerns",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "recurring_questions",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "faq",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "communication_plan",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "response_schedule",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "operational_checklist",
+          "type": "json",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": [
@@ -831,6 +891,710 @@
         }
       ],
       "indexes": ["CREATE UNIQUE INDEX idx_settings_key ON settings (key)"]
+    },
+    {
+      "name": "audience_snapshots",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "date",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "platform",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "followers",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "reach",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "impressions",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "engagement",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "engagement_rate",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "shares",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "video_completion_rate",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "ctr",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "sentiment",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_audience_date ON audience_snapshots (date)",
+        "CREATE INDEX idx_audience_platform ON audience_snapshots (platform)"
+      ]
+    },
+    {
+      "name": "competitive_actors",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "name",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "role",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "region",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "platforms",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "active",
+          "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "competitive_snapshots",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "actor",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "competitive_actors"
+        },
+        {
+          "name": "date",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "platform",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "posts_count",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "engagement",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "estimated_reach",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "audiences",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "top_themes",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_comp_snap_actor ON competitive_snapshots (actor)",
+        "CREATE INDEX idx_comp_snap_date ON competitive_snapshots (date)"
+      ]
+    },
+    {
+      "name": "content_items",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "title",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "type",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": [
+            "reels",
+            "tiktok",
+            "stories",
+            "carousel",
+            "post",
+            "threads",
+            "twitter",
+            "facebook",
+            "linkedin",
+            "youtube",
+            "shorts",
+            "whatsapp",
+            "telegram",
+            "site",
+            "newsletter"
+          ]
+        },
+        {
+          "name": "status",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": [
+            "idea",
+            "briefing",
+            "research",
+            "draft",
+            "review",
+            "approval",
+            "scheduling",
+            "published",
+            "performance",
+            "archived"
+          ]
+        },
+        {
+          "name": "idea",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "briefing",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "draft",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "campaign",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "channel",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "scheduled_at",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "published_at",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "performance",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_content_status ON content_items (status)",
+        "CREATE INDEX idx_content_type ON content_items (type)",
+        "CREATE INDEX idx_content_scheduled ON content_items (scheduled_at)"
+      ]
+    },
+    {
+      "name": "reputation_scores",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "date",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "prs_score",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "sentiment",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "reach",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "engagement",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "trust",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "authority",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "mention_frequency",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "polarization",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "growth_speed",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "regional_influence",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": ["CREATE INDEX idx_reputation_date ON reputation_scores (date)"]
+    },
+    {
+      "name": "brand_attributes",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "attribute",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "category",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "strength",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "sentiment",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "period",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "predictions",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "metric",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "timeframe",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "predicted_value",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "confidence",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "factors",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "justification",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": ["CREATE INDEX idx_predictions_metric ON predictions (metric)"]
+    },
+    {
+      "name": "strategic_insights",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "module",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "summary",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "type",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["opportunity", "risk", "trend", "insight"]
+        },
+        {
+          "name": "confidence",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "source_data",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_insights_module ON strategic_insights (module)",
+        "CREATE INDEX idx_insights_type ON strategic_insights (type)"
+      ]
+    },
+    {
+      "name": "social_topics",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "term",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "type",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": [
+            "hashtag",
+            "keyword",
+            "name",
+            "nickname",
+            "project",
+            "event",
+            "city",
+            "secretary",
+            "program",
+            "policy"
+          ]
+        },
+        {
+          "name": "active",
+          "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": ["CREATE INDEX idx_topics_type ON social_topics (type)"]
     }
   ]
 }

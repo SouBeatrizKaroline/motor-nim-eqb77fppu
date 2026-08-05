@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import {
-  Zap,
+  BrainCircuit,
   LayoutDashboard,
   AlertTriangle,
   FileText,
@@ -11,6 +11,7 @@ import {
   Settings,
   LogOut,
   X,
+  BarChart3,
 } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
 import { Badge } from '@/components/ui/badge'
@@ -32,10 +33,9 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
   const loadAlerts = async () => {
     try {
       const alerts = await getCrisisAlerts()
-      const active = alerts.filter(
-        (a: any) => a.status !== 'resolvido' && a.status !== 'descartado',
-      ).length
-      setActiveAlertsCount(active)
+      setActiveAlertsCount(
+        alerts.filter((a: any) => a.status !== 'resolvido' && a.status !== 'descartado').length,
+      )
     } catch {
       /* intentionally ignored */
     }
@@ -45,32 +45,30 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
     loadAlerts()
   }, [])
 
-  useRealtime('crisis_alerts', () => {
-    loadAlerts()
-  })
+  useRealtime('crisis_alerts', () => loadAlerts())
 
   const navItems = [
-    { label: 'Painel', path: '/', icon: LayoutDashboard },
-    { label: 'Alertas de Crise', path: '/alertas', icon: AlertTriangle, badge: activeAlertsCount },
-    { label: 'Discursos', path: '/discursos', icon: FileText },
-    { label: 'Roteiros', path: '/roteiros', icon: Video },
-    { label: 'Emendas', path: '/emendas', icon: Coins },
-    { label: 'Assistente NIM', path: '/assistente', icon: Bot },
+    { label: 'Central de Comando', path: '/', icon: LayoutDashboard },
+    { label: 'Radar de Crises', path: '/alertas', icon: AlertTriangle, badge: activeAlertsCount },
+    { label: 'Estúdio de Discursos', path: '/discursos', icon: FileText },
+    { label: 'Estúdio de Conteúdo', path: '/roteiros', icon: Video },
+    { label: 'Matching Orçamentário', path: '/emendas', icon: Coins },
+    { label: 'Inteligência', path: '/inteligencia', icon: BarChart3 },
+    { label: 'Copiloto Estratégico', path: '/assistente', icon: Bot },
     { label: 'Configurações', path: '/configuracoes', icon: Settings },
   ]
 
-  const sidebarContent = (
-    <div className="flex flex-col h-full bg-slate-950 text-slate-100 border-r border-slate-800">
-      {/* Logo */}
-      <div className="flex items-center justify-between h-16 px-6 border-b border-slate-800">
+  const content = (
+    <div className="flex flex-col h-full bg-card border-r border-border">
+      <div className="flex items-center justify-between h-16 px-6 border-b border-border">
         <Link to="/" className="flex items-center space-x-3">
-          <div className="p-2 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 shadow-md shadow-cyan-500/20">
-            <Zap className="w-5 h-5 text-white fill-white" />
+          <div className="p-2 rounded-xl bg-gradient-to-tr from-teal-500 to-indigo-600 shadow-md shadow-teal-500/20">
+            <BrainCircuit className="w-5 h-5 text-white" />
           </div>
           <div>
-            <span className="text-lg font-black tracking-wider text-white">MOTOR NIM</span>
-            <span className="block text-[10px] text-cyan-400 font-mono tracking-widest uppercase">
-              Inteligência de Mandato
+            <span className="text-lg font-black tracking-wider text-foreground">CÓRTEX</span>
+            <span className="block text-[10px] text-primary font-mono tracking-widest uppercase">
+              Inteligência Estratégica
             </span>
           </div>
         </Link>
@@ -79,21 +77,19 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
             variant="ghost"
             size="icon"
             onClick={onCloseMobile}
-            className="md:hidden text-slate-400"
+            className="md:hidden text-muted-foreground"
           >
             <X className="w-5 h-5" />
           </Button>
         )}
       </div>
 
-      {/* Navigation */}
       <div className="flex-1 py-6 px-4 space-y-1.5 overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon
           const isActive =
             location.pathname === item.path ||
             (item.path !== '/' && location.pathname.startsWith(item.path))
-
           return (
             <Link
               key={item.path}
@@ -102,21 +98,21 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
               className={cn(
                 'flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all group',
                 isActive
-                  ? 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 shadow-sm'
-                  : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900',
+                  ? 'bg-primary/10 text-primary border border-primary/30'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted',
               )}
             >
               <div className="flex items-center space-x-3">
                 <Icon
                   className={cn(
                     'w-4 h-4 transition-colors',
-                    isActive ? 'text-cyan-400' : 'text-slate-400 group-hover:text-slate-200',
+                    isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground',
                   )}
                 />
                 <span>{item.label}</span>
               </div>
               {item.badge !== undefined && item.badge > 0 && (
-                <Badge className="bg-rose-500 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full animate-pulse">
+                <Badge className="bg-destructive text-destructive-foreground text-[11px] font-bold px-1.5 py-0.5 rounded-full animate-pulse">
                   {item.badge}
                 </Badge>
               )}
@@ -125,28 +121,25 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
         })}
       </div>
 
-      {/* Footer / User Profile */}
-      <div className="p-4 border-t border-slate-800/80 bg-slate-900/50">
+      <div className="p-4 border-t border-border">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3 overflow-hidden">
-            <div className="w-9 h-9 rounded-full bg-cyan-600/30 border border-cyan-500/40 flex items-center justify-center font-bold text-cyan-300 text-sm">
+            <div className="w-9 h-9 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center font-bold text-primary text-sm">
               {user?.name?.[0]?.toUpperCase() || 'A'}
             </div>
             <div className="truncate">
-              <p className="text-xs font-bold text-slate-100 truncate">
-                {user?.name || 'Assessor NIM'}
+              <p className="text-xs font-bold text-foreground truncate">
+                {user?.name || 'Operador'}
               </p>
-              <p className="text-[10px] text-slate-400 truncate">
-                {user?.email || 'assessor@mandato.gov.br'}
-              </p>
+              <p className="text-[10px] text-muted-foreground truncate">{user?.email || ''}</p>
             </div>
           </div>
           <Button
             variant="ghost"
             size="icon"
             onClick={signOut}
-            title="Sair da conta"
-            className="text-slate-400 hover:text-rose-400 hover:bg-rose-500/10"
+            title="Sair"
+            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
           >
             <LogOut className="w-4 h-4" />
           </Button>
@@ -157,17 +150,15 @@ export function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps) {
 
   return (
     <>
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:block w-64 flex-shrink-0 h-screen sticky top-0">
-        {sidebarContent}
-      </aside>
-
-      {/* Mobile Drawer Overlay */}
+      <aside className="hidden md:block w-64 flex-shrink-0 h-screen sticky top-0">{content}</aside>
       {mobileOpen && (
         <div className="fixed inset-0 z-50 md:hidden flex">
-          <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={onCloseMobile} />
-          <div className="relative flex-1 w-full max-w-xs h-full z-10 animate-fade-in-right">
-            {sidebarContent}
+          <div
+            className="fixed inset-0 bg-background/80 backdrop-blur-sm"
+            onClick={onCloseMobile}
+          />
+          <div className="relative flex-1 w-full max-w-xs h-full z-10 animate-fade-in">
+            {content}
           </div>
         </div>
       )}

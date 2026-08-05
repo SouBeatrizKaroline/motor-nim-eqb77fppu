@@ -4,6 +4,7 @@ import { Toaster } from '@/components/ui/toaster'
 import { Toaster as Sonner } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { AuthProvider } from '@/hooks/use-auth'
+import { ThemeProvider } from '@/hooks/use-theme'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import Index from './pages/Index'
 import NotFound from './pages/NotFound'
@@ -14,6 +15,7 @@ import ResetPassword from './pages/ResetPassword'
 import VerifyEmail from './pages/VerifyEmail'
 import ConfirmEmailChange from './pages/ConfirmEmailChange'
 import Layout from './components/Layout'
+import Inteligencia from './pages/Inteligencia'
 import Alerts from './pages/Alerts'
 import AlertDetail from './pages/AlertDetail'
 import Discursos from './pages/Discursos'
@@ -28,32 +30,35 @@ import Configuracoes from './pages/Configuracoes'
 const App = () => (
   <BrowserRouter>
     <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
-          <Route path="/confirm-email-change" element={<ConfirmEmailChange />} />
-          <Route element={<ProtectedRoute />}>
-            <Route element={<Layout />}>
-              <Route path="/" element={<Index />} />
-              <Route path="/alertas" element={<Alerts />} />
-              <Route path="/alertas/:id" element={<AlertDetail />} />
-              <Route path="/discursos" element={<Discursos />} />
-              <Route path="/roteiros" element={<Roteiros />} />
-              <Route path="/emendas" element={<Emendas />} />
-              <Route path="/assistente" element={<Assistente />} />
-              <Route path="/configuracoes" element={<Configuracoes />} />
-              {/* ADD ALL CUSTOM ROUTES MUST BE ADDED HERE */}
+      <ThemeProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/confirm-email-change" element={<ConfirmEmailChange />} />
+            <Route element={<ProtectedRoute />}>
+              <Route element={<Layout />}>
+                <Route path="/" element={<Index />} />
+                <Route path="/inteligencia" element={<Inteligencia />} />
+                <Route path="/alertas" element={<Alerts />} />
+                <Route path="/alertas/:id" element={<AlertDetail />} />
+                <Route path="/discursos" element={<Discursos />} />
+                <Route path="/roteiros" element={<Roteiros />} />
+                <Route path="/emendas" element={<Emendas />} />
+                <Route path="/assistente" element={<Assistente />} />
+                <Route path="/configuracoes" element={<Configuracoes />} />
+                {/* ADD ALL CUSTOM ROUTES MUST BE ADDED HERE */}
+              </Route>
             </Route>
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </TooltipProvider>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </TooltipProvider>
+      </ThemeProvider>
     </AuthProvider>
   </BrowserRouter>
 )
