@@ -92,7 +92,8 @@ import {
   type BrandIdentity,
   type ContentItemBriefing,
 } from '@/services/content_studio'
-import { getSocialTopics, getSnapshots } from '@/services/nim'
+import { getSnapshots } from '@/services/nim'
+import { getSocialTopics } from '@/services/intelligence'
 
 // Platforms definition with icons and constraints
 const PLATFORMS = [

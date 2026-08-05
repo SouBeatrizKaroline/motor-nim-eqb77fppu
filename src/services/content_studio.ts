@@ -70,18 +70,14 @@ export const getBrandSettings = async (): Promise<BrandIdentity | null> => {
 }
 
 export const saveBrandSettings = async (data: BrandIdentity) => {
-  try {
-    const rec = await pb
-      .collection('settings')
-      .getFirstListItem('key="brand_identity"')
-      .catch(() => null)
-    if (rec) {
-      return await pb.collection('settings').update(rec.id, { value: data })
-    } else {
-      return await pb.collection('settings').create({ key: 'brand_identity', value: data })
-    }
-  } catch (err) {
-    throw err
+  const rec = await pb
+    .collection('settings')
+    .getFirstListItem('key="brand_identity"')
+    .catch(() => null)
+  if (rec) {
+    return await pb.collection('settings').update(rec.id, { value: data })
+  } else {
+    return await pb.collection('settings').create({ key: 'brand_identity', value: data })
   }
 }
 
