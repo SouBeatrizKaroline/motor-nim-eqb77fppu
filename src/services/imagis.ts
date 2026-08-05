@@ -46,7 +46,7 @@ export const getNotifications = () =>
 
 export const getSettingsRecord = async () => {
   try {
-    return await pb.collection('settings').getFirstListItem('key="motor_nim"')
+    return await pb.collection('settings').getFirstListItem('key="motor_imagis"')
   } catch (_) {
     return null
   }
@@ -57,10 +57,9 @@ export const saveSettingsRecord = async (value: Settings) => {
   if (existing) {
     return pb.collection('settings').update(existing.id, { value })
   }
-  return pb.collection('settings').create({ key: 'motor_nim', value })
+  return pb.collection('settings').create({ key: 'motor_imagis', value })
 }
 
-// Custom route triggers
 export const triggerVTrackerIngest = (manual = false, data?: any) =>
   pb.send('/backend/v1/vtracker/ingest', {
     method: 'POST',
@@ -104,7 +103,7 @@ export const triggerAmendmentAnalyze = () =>
 export const triggerNotificationSend = (notificationId: string) =>
   pb.send(`/backend/v1/notifications/${notificationId}/send`, { method: 'POST' })
 
-export const askNimAgent = (message: string, conversationId?: string | null) =>
+export const askImagisAgent = (message: string, conversationId?: string | null) =>
   pb.send('/backend/v1/ask', {
     method: 'POST',
     body: JSON.stringify({ message, conversation_id: conversationId }),

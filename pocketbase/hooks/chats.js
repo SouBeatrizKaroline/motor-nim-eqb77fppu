@@ -7,7 +7,7 @@ routerAdd(
       if (!userId) return e.unauthorizedError('Autenticação necessária')
 
       const conversations = $ai
-        .agent('nim-analista')
+        .agent('imagis-analista')
         .listConversations({ user_id: userId, limit: 20 })
       return e.json(200, conversations)
     } catch (err) {
@@ -26,7 +26,7 @@ routerAdd(
       if (!userId) return e.unauthorizedError('Autenticação necessária')
       const convId = e.request.pathValue('conversationId')
 
-      const messages = $ai.agent('nim-analista').listMessages({
+      const messages = $ai.agent('imagis-analista').listMessages({
         conversation_id: convId,
         user_id: userId,
       })

@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/select'
 import { useRealtime } from '@/hooks/use-realtime'
 import { useToast } from '@/hooks/use-toast'
-import { getSpeeches, deleteSpeech, triggerSpeechGenerate } from '@/services/nim'
+import { getSpeeches, deleteSpeech, triggerSpeechGenerate } from '@/services/imagis'
 
 export default function Discursos() {
   const { toast } = useToast()

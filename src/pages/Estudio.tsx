@@ -92,7 +92,7 @@ import {
   type BrandIdentity,
   type ContentItemBriefing,
 } from '@/services/content_studio'
-import { getSnapshots } from '@/services/nim'
+import { getSnapshots } from '@/services/imagis'
 import { getSocialTopics } from '@/services/intelligence'
 
 // Platforms definition with icons and constraints
@@ -307,7 +307,7 @@ export default function Estudio() {
       setGenStepLabel('Conteúdo gerado com sucesso!')
 
       toast({
-        title: 'CÓRTEX: Conteúdo Criado!',
+        title: 'Imagis: Conteúdo Criado!',
         description: `"${result.titulo}" gerado e salvo como Rascunho.`,
       })
 
@@ -497,12 +497,12 @@ export default function Estudio() {
                 Núcleo Criativo Multimodal
               </Badge>
               <Badge className="bg-primary/30 text-primary-foreground border-primary/40 text-[10px]">
-                IA Agêntica CÓRTEX
+                IA Agêntica Imagis
               </Badge>
             </div>
             <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl flex items-center gap-2">
               <Sparkles className="h-7 w-7 text-amber-400 animate-pulse" />
-              Núcleo Criativo CÓRTEX
+              Núcleo Criativo Imagis
             </h1>
             <p className="text-slate-300 text-xs sm:text-sm mt-1 max-w-2xl">
               Transforme inteligência social e pautas estratégicas em textos institucionais, guias
@@ -738,7 +738,7 @@ export default function Estudio() {
                 <div className="flex items-center justify-between rounded-lg border p-3 bg-muted/30">
                   <div className="space-y-0.5">
                     <Label className="text-xs font-semibold">
-                      Aplicar Diretrizes da Marca CÓRTEX
+                      Aplicar Diretrizes da Marca Imagis
                     </Label>
                     <p className="text-[11px] text-muted-foreground">
                       Aplica cores ({brandData.primary_color}), termos proibidos e hashtages padrão
@@ -777,7 +777,7 @@ export default function Estudio() {
                   <CardHeader>
                     <CardTitle className="text-base flex items-center gap-2 text-amber-600 dark:text-amber-400">
                       <Sparkles className="h-5 w-5 animate-spin" />
-                      Processamento Agêntico CÓRTEX
+                      Processamento Agêntico Imagis
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -844,7 +844,7 @@ export default function Estudio() {
                     </div>
                     <CardTitle className="text-base">Pronto para Criar</CardTitle>
                     <CardDescription className="text-xs max-w-xs mx-auto">
-                      Preencha o formulário ao lado e clique em "Gerar Conteúdo". O CÓRTEX cuidará
+                      Preencha o formulário ao lado e clique em "Gerar Conteúdo". O Imagis cuidará
                       da síntese, adaptações visuais e roteiro.
                     </CardDescription>
                   </CardHeader>
@@ -1374,7 +1374,7 @@ export default function Estudio() {
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <Palette className="h-5 w-5 text-indigo-500" />
-                Guia da Marca & Diretrizes Institucionais CÓRTEX
+                Guia da Marca & Diretrizes Institucionais Imagis
               </CardTitle>
               <CardDescription>
                 Defina as cores oficiais, slogan, diretrizes de tom de voz e termos restritos. O

@@ -9,7 +9,7 @@ routerAdd(
 
       let webhookUrl = ''
       try {
-        const settingsRec = $app.findFirstRecordByData('settings', 'key', 'motor_nim')
+        const settingsRec = $app.findFirstRecordByData('settings', 'key', 'motor_imagis')
         const val = settingsRec.get('value') || {}
         webhookUrl = val.whatsapp_webhook_url || ''
       } catch (_) {}

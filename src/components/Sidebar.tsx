@@ -20,7 +20,7 @@ const navItems = [
   { name: 'Gerador de Discursos', path: '/discursos', icon: FileText },
   { name: 'Roteiros de Retenção', path: '/roteiros', icon: Video },
   { name: 'Emendas & Demandas', path: '/emendas', icon: FileSpreadsheet },
-  { name: 'Copiloto Nim', path: '/assistente', icon: Bot },
+  { name: 'Copiloto Imagis', path: '/assistente', icon: Bot },
   { name: 'Configurações', path: '/configuracoes', icon: Settings },
 ]
 
@@ -32,11 +32,11 @@ export function Sidebar() {
       <div className="flex h-16 items-center border-b px-6">
         <Link to="/" className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold shadow-md shadow-primary/20">
-            N
+            I
           </div>
           <div className="flex flex-col">
-            <span className="font-bold text-sm leading-tight tracking-wide">MOTOR NIM</span>
-            <span className="text-[10px] text-muted-foreground font-mono">Núcleo Agêntico</span>
+            <span className="font-bold text-sm leading-tight tracking-wide">MOTOR IMAGIS</span>
+            <span className="text-[10px] text-muted-foreground font-mono">Imagis Engine</span>
           </div>
         </Link>
       </div>
@@ -76,7 +76,7 @@ export function Sidebar() {
                       : 'bg-amber-500/10 text-amber-500 border border-amber-500/20',
                   )}
                 >
-                  {item.badge}
+                  {item.badge === 'CÓRTEX' ? 'IMAGIS' : item.badge}
                 </span>
               )}
             </Link>
@@ -90,7 +90,7 @@ export function Sidebar() {
             <span className="font-medium text-foreground">Status do Sistema</span>
             <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
           </div>
-          <p className="text-muted-foreground text-[11px]">V-Tracker & CÓRTEX Conectados</p>
+          <p className="text-muted-foreground text-[11px]">V-Tracker & Imagis Conectados</p>
         </div>
       </div>
     </aside>

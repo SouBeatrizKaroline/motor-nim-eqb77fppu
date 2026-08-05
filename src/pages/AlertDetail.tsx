@@ -17,7 +17,7 @@ import {
   triggerCrisisProcess,
   updateCrisisAlert,
   triggerNotificationSend,
-} from '@/services/nim'
+} from '@/services/imagis'
 import { TimelineView } from '@/components/TimelineView'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'

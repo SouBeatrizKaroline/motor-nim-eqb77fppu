@@ -15,7 +15,11 @@ import {
 } from '@/components/ui/select'
 import { useRealtime } from '@/hooks/use-realtime'
 import { useToast } from '@/hooks/use-toast'
-import { getRetentionScripts, deleteRetentionScript, triggerScriptGenerate } from '@/services/nim'
+import {
+  getRetentionScripts,
+  deleteRetentionScript,
+  triggerScriptGenerate,
+} from '@/services/imagis'
 
 export default function Roteiros() {
   const { toast } = useToast()

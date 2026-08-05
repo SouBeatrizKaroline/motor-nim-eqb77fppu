@@ -13,7 +13,7 @@ import {
   getBudgetItems,
   getAmendmentReports,
   triggerAmendmentAnalyze,
-} from '@/services/nim'
+} from '@/services/imagis'
 
 export default function Emendas() {
   const { toast } = useToast()

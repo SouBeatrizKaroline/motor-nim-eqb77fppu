@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
-import { getSettingsRecord, saveSettingsRecord } from '@/services/nim'
+import { getSettingsRecord, saveSettingsRecord } from '@/services/imagis'
 
 export default function Configuracoes() {
   const { toast } = useToast()

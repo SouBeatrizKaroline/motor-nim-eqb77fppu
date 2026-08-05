@@ -52,9 +52,10 @@ export default function SignUp() {
           <div className="inline-flex p-3 rounded-2xl bg-gradient-to-tr from-cyan-500 to-indigo-600 shadow-xl mb-2">
             <Zap className="w-8 h-8 text-white fill-white" />
           </div>
-          <h1 className="text-2xl font-black text-white">Criar Conta no NIM</h1>
-          <p className="text-xs text-cyan-400 font-mono tracking-widest uppercase">
-            Núcleo de Inteligência de Mandato
+          <h1 className="text-2xl font-black text-white">Criar Conta no Imagis</h1>
+          <p className="text-[10px] text-cyan-400 font-mono tracking-wider">
+            Imagis — Inteligência Estratégica para Comunicação Institucional, Gestão de Reputação e
+            Apoio à Decisão Baseado em Dados
           </p>
         </div>
 

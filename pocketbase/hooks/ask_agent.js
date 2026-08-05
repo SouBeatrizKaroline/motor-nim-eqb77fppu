@@ -15,7 +15,7 @@ routerAdd(
             : ''
       if (!message) return e.badRequestError('Mensagem é obrigatória')
 
-      const result = $ai.agent('nim-analista').chat({
+      const result = $ai.agent('imagis-analista').chat({
         user_id: userId,
         conversation_id: body.conversation_id || null,
         message: message,
@@ -30,7 +30,7 @@ routerAdd(
     } catch (err) {
       if (err instanceof SkipAiConfigError)
         return e.json(503, { error: 'IA temporariamente indisponível' })
-      return e.json(500, { error: err.message || 'Erro no agente NIM' })
+      return e.json(500, { error: err.message || 'Erro no agente Imagis' })
     }
   },
   $apis.requireAuth(),

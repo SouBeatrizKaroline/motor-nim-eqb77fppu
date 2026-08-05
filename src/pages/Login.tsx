@@ -29,7 +29,7 @@ export default function Login() {
         variant: 'destructive',
       })
     } else {
-      toast({ title: 'Acesso autorizado', description: 'Bem-vindo ao CÓRTEX.' })
+      toast({ title: 'Acesso autorizado', description: 'Bem-vindo ao Imagis.' })
       navigate('/')
     }
   }
@@ -42,9 +42,10 @@ export default function Login() {
           <div className="inline-flex p-3 rounded-2xl bg-gradient-to-tr from-teal-500 to-indigo-600 shadow-xl shadow-teal-500/20 mb-2">
             <BrainCircuit className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-black text-foreground tracking-wider">CÓRTEX</h1>
-          <p className="text-xs text-primary font-mono tracking-widest uppercase">
-            Inteligência Estratégica Institucional
+          <h1 className="text-2xl font-black text-foreground tracking-wider">Imagis</h1>
+          <p className="text-[10px] text-primary font-mono tracking-wider">
+            Imagis — Inteligência Estratégica para Comunicação Institucional, Gestão de Reputação e
+            Apoio à Decisão Baseado em Dados
           </p>
         </div>
         <Card className="border-border bg-card/90 backdrop-blur text-card-foreground shadow-2xl">

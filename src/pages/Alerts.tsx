@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { AlertTriangle, Filter, Play, CheckCircle2, Clock, Send, Eye } from 'lucide-react'
-import { getCrisisAlerts, triggerCrisisProcess } from '@/services/nim'
+import { getCrisisAlerts, triggerCrisisProcess } from '@/services/imagis'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'

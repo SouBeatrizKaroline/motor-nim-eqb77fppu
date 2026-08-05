@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useToast } from '@/hooks/use-toast'
-import { askNimAgent } from '@/services/nim'
+import { askImagisAgent } from '@/services/imagis'
 import { cn } from '@/lib/utils'
 
 interface ChatMessage {
@@ -52,7 +52,7 @@ export default function Assistente() {
     setLoading(true)
 
     try {
-      const result = await askNimAgent(message, conversationId)
+      const result = await askImagisAgent(message, conversationId)
       if (result.conversation_id) {
         setConversationId(result.conversation_id)
       }

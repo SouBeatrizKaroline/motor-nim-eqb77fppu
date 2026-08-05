@@ -31,7 +31,7 @@ import {
   getPipelineRuns,
   triggerVTrackerIngest,
   triggerCrisisDetect,
-} from '@/services/nim'
+} from '@/services/imagis'
 import { useToast } from '@/hooks/use-toast'
 
 export default function Index() {

@@ -187,7 +187,7 @@ routerAdd(
       }
 
       var prompt =
-        'Você é o motor de IA do Núcleo Criativo CÓRTEX, especialista em comunicação política estratégica e marketing governamental no Brasil.\n\n' +
+        'Você é o motor de IA do Núcleo Criativo Imagis, especialista em comunicação política estratégica e marketing governamental no Brasil.\n\n' +
         brandInfo +
         intelligenceContext +
         'SOLICITAÇÃO DE CONTEÚDO:\n' +
@@ -319,7 +319,7 @@ routerAdd(
         pipeRec.set('pipeline', 'roteiro')
         pipeRec.set('trigger', 'manual')
         pipeRec.set('status', 'sucesso')
-        pipeRec.set('stage', 'Núcleo Criativo CÓRTEX: ' + ctLabel)
+        pipeRec.set('stage', 'Núcleo Criativo Imagis: ' + ctLabel)
         pipeRec.set('input', {
           content_type: contentType,
           platform: platform,

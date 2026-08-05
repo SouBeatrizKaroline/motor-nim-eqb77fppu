@@ -5,7 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Badge } from '@/components/ui/badge'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { useRealtime } from '@/hooks/use-realtime'
-import { getNotifications } from '@/services/nim'
+import { getNotifications } from '@/services/imagis'
 
 interface HeaderProps {
   title: string

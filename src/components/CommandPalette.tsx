@@ -59,7 +59,7 @@ export function CommandPalette({ open: externalOpen, onOpenChange }: CommandPale
 
   return (
     <CommandDialog open={isOpen} onOpenChange={setIsOpen}>
-      <CommandInput placeholder="Digite um comando ou busque no CÓRTEX... (ex: 'Novo post', 'Alertas')" />
+      <CommandInput placeholder="Digite um comando ou busque no Imagis... (ex: 'Novo post', 'Alertas')" />
       <CommandList className="max-h-[380px]">
         <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
 
@@ -91,7 +91,7 @@ export function CommandPalette({ open: externalOpen, onOpenChange }: CommandPale
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => navigate('/estudio'))}>
             <Sparkles className="mr-2 h-4 w-4 text-violet-500" />
-            <span>Núcleo Criativo CÓRTEX</span>
+            <span>Núcleo Criativo Imagis</span>
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => navigate('/alertas'))}>
             <AlertTriangle className="mr-2 h-4 w-4 text-rose-500" />
@@ -111,7 +111,7 @@ export function CommandPalette({ open: externalOpen, onOpenChange }: CommandPale
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => navigate('/assistente'))}>
             <Bot className="mr-2 h-4 w-4 text-amber-400" />
-            <span>Agente Copiloto Nim</span>
+            <span>Agente Copiloto Imagis</span>
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => navigate('/configuracoes'))}>
             <Settings className="mr-2 h-4 w-4 text-slate-400" />
