@@ -11,9 +11,10 @@ routerAdd(
       const latest = snapshots[0]
       const negVol = latest.getInt('negative_volume')
       const polarity = latest.getFloat('polarity_index')
+      const mentionVol = latest.getInt('mention_volume')
 
-      let baselineNegSum = 0
-      let count = 0
+      let baselineNegSum = 0,
+        count = 0
       for (let i = 1; i < snapshots.length; i++) {
         baselineNegSum += snapshots[i].getInt('negative_volume')
         count++
@@ -35,6 +36,9 @@ routerAdd(
         const terms = latest.get('emerging_terms') || []
         const topTerm = terms.length > 0 ? terms[0].term : 'atendimento público'
 
+        const riskEstimate = Math.min(100, Math.round(ratio * 20))
+        const potentialReach = Math.round(mentionVol * 3.5)
+
         alertRec.set(
           'summary',
           "Anomalia detectada em escuta social: surto de menções negativas relacionado a '" +
@@ -51,12 +55,21 @@ routerAdd(
         })
         alertRec.set('related_snapshot', latest.id)
         alertRec.set('sent_status', 'pendente')
+        alertRec.set('risk_estimate', riskEstimate)
+        alertRec.set('potential_reach', potentialReach)
+        alertRec.set('executive_summary', '')
+        alertRec.set('timeline', [])
+        alertRec.set('main_concerns', [])
+        alertRec.set('recurring_questions', [])
+        alertRec.set('faq', [])
+        alertRec.set('communication_plan', '')
+        alertRec.set('response_schedule', [])
+        alertRec.set('operational_checklist', [])
         $app.save(alertRec)
 
         createdAlert = true
         alertId = alertRec.id
 
-        // Register pipeline run
         try {
           const pipeCol = $app.findCollectionByNameOrId('pipeline_runs')
           const pipeRec = new Record(pipeCol)
